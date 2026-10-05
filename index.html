@@ -940,6 +940,9 @@
 
   <!-- HUD Top Right Controls -->
   <div class="hud-controls-top">
+    <button class="hud-btn" id="hudMusicBtn" onclick="toggleFloorBGM()" title="Toggle 90s Vibe Ambient Music">
+      <span id="hudMusicIcon">📻</span> <span id="hudMusicText">MUSIC: ON</span>
+    </button>
     <button class="hud-btn" onclick="openCertModal()">
       <span style="color:var(--oxblood);">📜</span> Employment Certificate
     </button>
@@ -1298,11 +1301,203 @@
       tone(440, 0.05, 'square', 0.03);
     }
 
-    function toggleChamberSound() {
-      chamberSound = !chamberSound;
-      document.getElementById('chamberSoundBtn').innerText = `AUDIO: ${chamberSound ? 'ON' : 'OFF'}`;
-      if (chamberSound) tone(440, 0.1);
+    // ==========================================================================
+    // 90s VIBE SOOTHING AMBIENT CORPORATE SYNTH (Slow & Warm Lounge / Office)
+    // Plays smoothly in normal game; automatically fades out when Musical Chairs starts,
+    // and seamlessly fades back in when exiting the arena back to the floor.
+    // ==========================================================================
+    let floorMusicEnabled = true;
+    let floorBGMActive = false;
+    let floorBGMInterval = null;
+    let floorBGMStep = 0;
+    let bgmMasterGain = null;
+
+    // Classic 90s corporate elevator/lounge progressions (Maj7 & Min7 chords, gentle electric piano / pad tones)
+    const BGM_90S_CHORDS = [
+      // Fmaj7: F3, A3, C4, E4
+      { bass: 87.31, chord: [174.61, 220.00, 261.63, 329.63], lead: 440.00 },
+      // G6/9 (smooth lift): G3, B3, D4, E4
+      { bass: 98.00, chord: [196.00, 246.94, 293.66, 329.63], lead: 392.00 },
+      // Em7: E3, G3, B3, D4
+      { bass: 82.41, chord: [164.81, 196.00, 246.94, 293.66], lead: 329.63 },
+      // Am9: A3, C4, E4, B4
+      { bass: 110.00, chord: [220.00, 261.63, 329.63, 493.88], lead: 523.25 },
+      // Dm7: D3, F3, A3, C4
+      { bass: 73.42, chord: [146.83, 174.61, 220.00, 261.63], lead: 349.23 },
+      // G7sus4 -> G7: G3, C4, D4, F4
+      { bass: 98.00, chord: [196.00, 261.63, 293.66, 349.23], lead: 392.00 },
+      // Cmaj9: C3, E3, G3, B3, D4
+      { bass: 65.41, chord: [130.81, 164.81, 196.00, 246.94], lead: 293.66 },
+      // Cmaj7 (rest resolution): C3, G3, B3, E4
+      { bass: 65.41, chord: [130.81, 196.00, 246.94, 329.63], lead: 261.63 }
+    ];
+
+    function startFloorBGM() {
+      if (!floorMusicEnabled) return;
+      if (arenaModal && arenaModal.classList.contains('active')) return;
+      if (floorBGMActive) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => {
+          if (floorMusicEnabled && !floorBGMActive && (!arenaModal || !arenaModal.classList.contains('active'))) {
+            startFloorBGM();
+          }
+        }).catch(() => {});
+        return;
+      }
+
+      floorBGMActive = true;
+      floorBGMStep = 0;
+
+      if (!bgmMasterGain) {
+        bgmMasterGain = audioCtx.createGain();
+        bgmMasterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        bgmMasterGain.connect(audioCtx.destination);
+      }
+
+      // Smooth 1.8s fade in to audible ambient level
+      bgmMasterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      bgmMasterGain.gain.setValueAtTime(bgmMasterGain.gain.value, audioCtx.currentTime);
+      bgmMasterGain.gain.linearRampToValueAtTime(0.22, audioCtx.currentTime + 1.8);
+
+      // Play slow 90s ambient steps (1.4s per step)
+      play90sAmbientChord();
+      floorBGMInterval = setInterval(play90sAmbientChord, 1400);
     }
+
+    function play90sAmbientChord() {
+      if (!floorBGMActive || !audioCtx || !floorMusicEnabled) return;
+      const ch = BGM_90S_CHORDS[floorBGMStep % BGM_90S_CHORDS.length];
+      floorBGMStep++;
+
+      const now = audioCtx.currentTime;
+
+      // 1. Warm electric piano / pad chord tones
+      ch.chord.forEach((freq, idx) => {
+        try {
+          const osc = audioCtx.createOscillator();
+          const noteGain = audioCtx.createGain();
+          const filter = audioCtx.createBiquadFilter();
+
+          // Low-pass filter for lush 90s analog warmth
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(800 + idx * 150, now);
+
+          osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+
+          // Gentle bell-like attack and slow release
+          noteGain.gain.setValueAtTime(0.0001, now);
+          noteGain.gain.linearRampToValueAtTime(0.26, now + 0.12);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+
+          osc.connect(filter);
+          filter.connect(noteGain);
+          noteGain.connect(bgmMasterGain);
+
+          osc.start(now);
+          osc.stop(now + 1.65);
+        } catch(e) {}
+      });
+
+      // 2. Soft, warm sub-bass note
+      try {
+        const bassOsc = audioCtx.createOscillator();
+        const bassGain = audioCtx.createGain();
+        bassOsc.type = 'sine';
+        bassOsc.frequency.setValueAtTime(ch.bass, now);
+
+        bassGain.gain.setValueAtTime(0.0001, now);
+        bassGain.gain.linearRampToValueAtTime(0.32, now + 0.08);
+        bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+
+        bassOsc.connect(bassGain);
+        bassGain.connect(bgmMasterGain);
+
+        bassOsc.start(now);
+        bassOsc.stop(now + 1.45);
+      } catch(e) {}
+
+      // 3. Subtle melodic chime on alternate bars
+      if (floorBGMStep % 2 === 1 && ch.lead) {
+        try {
+          const leadOsc = audioCtx.createOscillator();
+          const leadGain = audioCtx.createGain();
+          leadOsc.type = 'triangle';
+          leadOsc.frequency.setValueAtTime(ch.lead, now + 0.25);
+
+          leadGain.gain.setValueAtTime(0.0001, now + 0.25);
+          leadGain.gain.linearRampToValueAtTime(0.18, now + 0.35);
+          leadGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
+
+          leadOsc.connect(leadGain);
+          leadGain.connect(bgmMasterGain);
+
+          leadOsc.start(now + 0.25);
+          leadOsc.stop(now + 1.4);
+        } catch(e) {}
+      }
+    }
+
+    function stopFloorBGM(fadeTime = 0.8) {
+      if (!floorBGMActive) return;
+      floorBGMActive = false;
+      if (floorBGMInterval) {
+        clearInterval(floorBGMInterval);
+        floorBGMInterval = null;
+      }
+      if (bgmMasterGain && audioCtx) {
+        try {
+          bgmMasterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+          bgmMasterGain.gain.setValueAtTime(bgmMasterGain.gain.value, audioCtx.currentTime);
+          bgmMasterGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + fadeTime);
+        } catch(e) {}
+      }
+    }
+
+    function toggleFloorBGM() {
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      floorMusicEnabled = !floorMusicEnabled;
+      const btn = document.getElementById('hudMusicText');
+      const icon = document.getElementById('hudMusicIcon');
+      if (btn) btn.innerText = `MUSIC: ${floorMusicEnabled ? 'ON' : 'OFF'}`;
+      if (icon) icon.innerText = floorMusicEnabled ? '📻' : '🔇';
+
+      if (floorMusicEnabled) {
+        // If not inside musical chairs arena, start floor music
+        if (!arenaModal || !arenaModal.classList.contains('active')) {
+          startFloorBGM();
+        }
+      } else {
+        stopFloorBGM(0.3);
+      }
+    }
+
+    // Autostart 90s ambient floor music on user interaction (clicks, WASD movement, touch)
+    function onFirstUserGesture() {
+      initAudio();
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => {
+          if (floorMusicEnabled && (!arenaModal || !arenaModal.classList.contains('active'))) {
+            startFloorBGM();
+          }
+        }).catch(() => {});
+      } else {
+        if (floorMusicEnabled && (!arenaModal || !arenaModal.classList.contains('active'))) {
+          startFloorBGM();
+        }
+      }
+    }
+    window.addEventListener('pointerdown', onFirstUserGesture);
+    window.addEventListener('keydown', onFirstUserGesture);
+    window.addEventListener('click', onFirstUserGesture);
+    window.addEventListener('touchstart', onFirstUserGesture);
 
     // ==========================================================================
     // MULTI-TRACK 1987 PHONOGRAPH MUSIC (Different Themes per Floor)
@@ -4352,6 +4547,9 @@
       setDeckHint("Read house protocol. Press ENTER CHAMBER or [SPACE] to begin.");
       chamberSitBtn.disabled = true;
 
+      // Immediately pause ambient floor BGM so musical chairs arena takes precedence
+      stopFloorBGM(0.4);
+
       arenaModal.classList.add('active'); if (promptEl) promptEl.style.display = 'none';
 
       if (!arenaAnimFrame) {
@@ -4660,6 +4858,7 @@
       }
       arenaModal.classList.remove('active');
       arenaPhase = 'idle';
+      startFloorBGM();
     }
 
     // ==========================================================================
@@ -6020,6 +6219,7 @@
     function closeCertModal() {
       playClick();
       certModal.classList.remove('active');
+      startFloorBGM();
     }
 
     function renderEngravedCertificate() {
