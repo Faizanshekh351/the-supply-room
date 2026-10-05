@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>The Supply Room · 1987 Corporate Odyssey</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -33,12 +36,17 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body, html {
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
+      position: fixed;
+      inset: 0;
       background: #0d0a07;
       font-family: 'Libre Caslon Text', Georgia, serif;
       color: var(--ink);
+      touch-action: none;
+      -webkit-touch-callout: none;
     }
 
     .hidden { display: none !important; }
@@ -64,24 +72,54 @@
       opacity: 0.5;
     }
 
-    /* HUD TOP BAR */
+    /* ==========================================================================
+       UNIFIED GAME TOP HUD (Zero Overlap, Docked Controls & Directives)
+       ========================================================================== */
+    .game-top-hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 12px 16px;
+      gap: 16px;
+      pointer-events: none;
+      z-index: 100;
+      box-sizing: border-box;
+      max-width: 100vw;
+    }
+
+    /* Top Right Column: Groups Controls & Active Quest Tracker Neatly */
+    .hud-right-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    /* HUD TOP BAR - PLAYER STATUS (Top Left) */
     .hud-panel {
-      position: absolute;
-      top: 16px;
-      left: 16px;
+      justify-self: start;
+      position: relative;
       background: var(--paper-raised);
       border: 3px solid var(--ink);
       box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 0 1px var(--rule);
-      padding: 12px 18px;
-      z-index: 20;
+      padding: 10px 14px;
       max-width: 440px;
+      min-width: 0;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      box-sizing: border-box;
+      pointer-events: auto;
     }
     .hud-medallion {
-      width: 60px;
-      height: 60px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       border: 2px solid var(--lamp);
       box-shadow: 0 0 8px rgba(176, 138, 60, 0.5);
@@ -89,44 +127,57 @@
       background: #110c08;
       object-fit: cover;
     }
+    .hud-details {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+    }
     .hud-details h1 {
       font-family: 'Cinzel', serif;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       color: var(--oxblood);
       text-transform: uppercase;
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .hud-details .sub {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 10.5px;
       color: var(--ink-muted);
       margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .hud-stats-row {
       display: flex;
-      gap: 12px;
-      margin-top: 6px;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 5px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
     }
     .hud-stat-badge {
       background: var(--paper-dim);
       border: 1px solid var(--rule);
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 2px;
+      white-space: nowrap;
     }
 
     /* TOP RIGHT CONTROLS */
     .hud-controls-top {
-      position: absolute;
-      top: 16px;
-      right: 16px;
+      position: relative;
       display: flex;
-      gap: 8px;
-      z-index: 20;
+      align-items: center;
+      gap: 6px;
+      pointer-events: auto;
+      flex-wrap: nowrap;
     }
     .hud-btn {
       background: var(--paper-raised);
@@ -134,77 +185,148 @@
       font-family: 'IBM Plex Mono', monospace;
       font-size: 11px;
       font-weight: 700;
-      padding: 8px 14px;
+      letter-spacing: 0.5px;
+      height: 32px;
+      padding: 0 10px;
+      box-sizing: border-box;
       cursor: pointer;
       color: var(--ink);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      display: flex;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 5px;
+      border-radius: 3px;
       transition: all 0.15s ease;
+      touch-action: manipulation;
+      white-space: nowrap;
+      user-select: none;
     }
     .hud-btn:hover {
       background: var(--ink);
       color: var(--paper-raised);
       transform: translateY(-1px);
     }
+    .hud-btn:active {
+      transform: translateY(1px);
+    }
+    .hud-btn.active {
+      background: var(--ink) !important;
+      color: #ffd700 !important;
+      border-color: #b08a3c !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 0 0 1px #ffd700;
+    }
+    .hud-btn.active:hover {
+      background: #110d0a !important;
+      color: #ffffff !important;
+    }
+    .hud-btn-reset {
+      color: #8c2a2a;
+    }
+    .hud-btn-reset:hover {
+      background: #8c2a2a;
+      color: #fff9ea;
+      border-color: #8c2a2a;
+    }
 
-    /* FLOATING INTERACTION PROMPT */
+    /* FLOATING INTERACTION PROMPT (Centered Horizontally at Bottom) */
     .interact-prompt {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--ink);
-      color: var(--paper);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 13px;
-      padding: 10px 22px;
-      border: 2px solid var(--lamp);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.8);
-      z-index: 20;
+      position: fixed !important;
+      left: 50% !important;
+      bottom: 24px !important;
+      transform: translateX(-50%) !important;
+      right: auto !important;
+      margin: 0 auto !important;
+      background: linear-gradient(180deg, #381914 0%, #1a0b07 100%) !important;
+      color: #fff9ea !important;
+      border: 2px solid #ffd875 !important;
+      outline: 2px solid #7a2e2e !important;
+      padding: 8px 18px !important;
+      font-family: 'IBM Plex Mono', monospace !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      border-radius: 5px !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.85), 0 0 16px rgba(255, 216, 117, 0.4), inset 0 1px 2px rgba(255,255,255,0.3) !important;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      -webkit-tap-highlight-color: transparent;
+      width: max-content !important;
+      max-width: min(calc(100vw - 32px), 460px) !important;
+      text-align: center !important;
+      white-space: normal !important;
+      line-height: 1.3 !important;
+      z-index: 200 !important;
       display: none;
-      letter-spacing: 0.5px;
-      animation: promptPulse 1.4s infinite alternate ease-in-out;
+      letter-spacing: 0.5px !important;
+      animation: pulsePromptCenter 1.2s infinite alternate ease-in-out !important;
     }
-    @keyframes promptPulse {
-      0% { transform: translateX(-50%) scale(1); }
-      100% { transform: translateX(-50%) scale(1.04); }
+    .interact-prompt:active {
+      transform: translateX(-50%) scale(0.96) !important;
+      background: #7a2e2e !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.95), inset 0 2px 4px rgba(0,0,0,0.7) !important;
+    }
+    @keyframes pulsePromptCenter {
+      0% {
+        transform: translateX(-50%) scale(1);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.85), 0 0 8px rgba(255, 216, 117, 0.35);
+        border-color: #ffd875;
+      }
+      100% {
+        transform: translateX(-50%) scale(1.03);
+        box-shadow: 0 8px 26px rgba(0,0,0,0.95), 0 0 20px rgba(255, 216, 117, 0.85);
+        border-color: #ffffff;
+      }
     }
 
-    /* TOAST NOTIFICATION */
+    /* TOAST NOTIFICATION (Floats cleanly ABOVE bottom interaction prompt) */
     .toast-memo {
-      position: absolute;
-      bottom: 24px;
-      right: 24px;
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
       background: var(--paper-raised);
-      border-left: 5px solid var(--oxblood);
-      border-top: 2px solid var(--ink);
-      border-right: 2px solid var(--ink);
-      border-bottom: 2px solid var(--ink);
-      padding: 12px 18px;
-      max-width: 340px;
-      z-index: 50;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-      font-size: 12px;
+      border: 3px solid var(--ink);
+      border-left: 6px solid var(--oxblood);
+      padding: 12px 24px;
+      max-width: 480px;
+      width: calc(100% - 36px);
+      box-sizing: border-box;
+      z-index: 2500;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.85), inset 0 0 0 1px var(--rule);
+      font-size: 13px;
+      text-align: center;
       display: none;
-      animation: slideToast 0.3s ease;
+      animation: popToastCenter 0.25s ease-out;
+      pointer-events: auto;
     }
-    @keyframes slideToast {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+    .toast-memo strong {
+      display: block;
+      letter-spacing: 1px;
+      color: var(--oxblood);
+    }
+    .toast-memo p {
+      margin-top: 4px;
+      color: var(--ink-muted);
+    }
+    @keyframes popToastCenter {
+      from { transform: translateX(-50%) translateY(16px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
     }
 
-    /* GENERAL MODAL BACKDROP */
+    /* GENERAL MODAL BACKDROP (High z-index to overlay gameplay HUD and joystick) */
     .modal-backdrop {
-      position: absolute;
+      position: fixed;
       inset: 0;
       background: rgba(10, 8, 6, 0.88);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 60;
-      padding: 20px;
+      z-index: 10000;
+      padding: 16px;
+      box-sizing: border-box;
     }
     .modal-backdrop.active { display: flex; }
 
@@ -214,6 +336,8 @@
       box-shadow: 0 25px 60px rgba(0,0,0,0.9), inset 0 0 0 1px var(--rule);
       max-width: 620px;
       width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
       padding: 24px;
       position: relative;
     }
@@ -230,6 +354,155 @@
       font-size: 18px;
       color: var(--oxblood);
       letter-spacing: 1px;
+    }
+
+    /* ELEVATOR CONCOURSE MODAL - RETRO 1987 CORPORATE CAR */
+    .elevator-modal-window {
+      max-width: 660px;
+      width: min(660px, 94vw);
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px;
+      box-sizing: border-box;
+    }
+    .elevator-header-row {
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+    }
+    .elevator-desc-text {
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    .elevator-floor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 6px 10px;
+      max-height: min(340px, 58vh);
+      overflow-y: auto;
+      padding-right: 4px;
+      box-sizing: border-box;
+    }
+    .elevator-floor-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 3px;
+      gap: 8px;
+      box-sizing: border-box;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      border: 1px solid var(--rule);
+      background: #f0e6d2;
+      color: var(--ink);
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      transition: all 0.12s ease-in-out;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .elevator-floor-card.is-unlocked:hover {
+      background: #e6dac1;
+      border-color: var(--oxblood);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.14);
+      transform: translateY(-1px);
+    }
+    .elevator-floor-card.is-unlocked:active {
+      background: #ded0b4;
+      transform: translateY(1px);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .elevator-floor-card.is-current {
+      background: #dfcfb0;
+      border: 2px solid var(--oxblood);
+      cursor: default;
+      box-shadow: none;
+    }
+    .elevator-floor-card.is-locked {
+      background: #ddceb8;
+      border: 1px dashed #bba990;
+      opacity: 0.62;
+      cursor: not-allowed;
+    }
+    .elevator-floor-card.is-locked:hover {
+      background: #d7c7af;
+      border-color: #9c4545;
+    }
+    .elevator-card-left {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .elevator-card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      color: var(--ink);
+    }
+    .elevator-floor-card.is-current .elevator-card-title {
+      color: var(--oxblood);
+    }
+    .elevator-floor-card.is-unlocked:hover .elevator-card-title {
+      color: var(--oxblood);
+    }
+    .elevator-card-sub {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8.5px;
+      color: var(--ink-muted);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .elevator-card-right {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .elevator-arrow-indicator {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      transition: color 0.12s, transform 0.12s;
+    }
+    .elevator-floor-card.is-unlocked:hover .elevator-arrow-indicator {
+      color: var(--oxblood);
+      transform: translateX(2px);
+    }
+    .elevator-badge-here {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--oxblood);
+      letter-spacing: 0.5px;
+    }
+    .elevator-badge-locked {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: #8a4040;
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+    }
+    .elevator-bottom-row {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     .desk-button {
@@ -259,144 +532,171 @@
        Unique bespoke design with brass marquetry, needle scratch & phonograph
        ========================================================================== */
     .musical-arena-overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
-      background: rgba(6, 4, 3, 0.94);
+      background: rgba(6, 4, 3, 0.96);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 70;
-      padding: 14px;
+      z-index: 11000;
+      padding: 0;
+      overflow: hidden;
     }
     .musical-arena-overlay.active { display: flex; }
 
     .chamber-cabinet {
-      width: 1160px;
-      max-width: 98vw;
-      max-height: 95vh;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
       display: flex;
       flex-direction: column;
       background: #190c06;
-      border: 7px solid #28140c;
-      outline: 3px solid #c99e3a;
-      outline-offset: -5px;
-      box-shadow: 0 0 0 7px #140804, 0 25px 60px rgba(0, 0, 0, 0.95), inset 0 0 40px rgba(0, 0, 0, 0.85);
+      border: none;
+      outline: none;
       position: relative;
       overflow: hidden;
-      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 1025px) and (min-height: 720px) {
+      .chamber-cabinet {
+        width: min(1160px, 96vw);
+        height: min(720px, 94vh);
+        border: 6px solid #28140c;
+        outline: 3px solid #c99e3a;
+        outline-offset: -4px;
+        border-radius: 4px;
+        box-shadow: 0 0 0 6px #140804, 0 25px 60px rgba(0, 0, 0, 0.95);
+      }
     }
 
     .chamber-header {
-      min-height: 72px;
+      min-height: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 12px 24px;
+      gap: 12px;
+      padding: 4px 14px;
       background: linear-gradient(180deg, #3a1c10 0%, #200f08 60%, #150904 100%);
-      border-bottom: 3px solid #d4af37;
-      box-shadow: inset 0 1px 0 rgba(255, 235, 170, 0.35), 0 4px 14px rgba(0, 0, 0, 0.7);
+      border-bottom: 2px solid #d4af37;
+      flex-shrink: 0;
+      box-sizing: border-box;
     }
     .chamber-brand {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
       color: #f7e7bd;
     }
     .chamber-seal {
-      width: 50px;
-      height: 50px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       border: 2px solid #ffd875;
       object-fit: cover;
       background: #110b06;
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4), inset 0 0 6px #000;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
       flex-shrink: 0;
     }
     .chamber-title-text h2 {
       font-family: 'Cinzel', serif;
-      font-size: 17px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       color: #ffd875;
       text-transform: uppercase;
-      line-height: 1.2;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      line-height: 1.1;
+      margin: 0;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     }
     .chamber-title-text small {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 9.5px;
       color: #d6be9f;
       display: block;
-      margin-top: 3px;
+      margin-top: 1px;
       letter-spacing: 0.5px;
     }
     .chamber-head-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
     .chamber-btn {
-      padding: 8px 16px;
+      padding: 4px 10px;
       background: linear-gradient(180deg, #f5ebd5 0%, #dfcfb2 100%);
       border: 2px solid #3d2314;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       cursor: pointer;
       color: #2a160d;
-      box-shadow: 0 2px 0 #150904, 0 3px 6px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 0 #150904;
       border-radius: 2px;
       transition: all 0.1s ease;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .chamber-btn:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 3px 0 #150904; }
-    .chamber-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #150904; }
+    .chamber-btn:hover { background: #fff; transform: translateY(-1px); }
+    .chamber-btn:active { transform: translateY(1px); }
 
     .chamber-body {
+      flex: 1;
+      min-height: 0;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 296px;
-      gap: 16px;
-      padding: 16px;
+      grid-template-columns: minmax(0, 1fr) 230px;
+      gap: 8px;
+      padding: 8px 10px;
       background: radial-gradient(circle at 50% 30%, #2a150c 0%, #150904 100%);
-      overflow-y: auto;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .chamber-stage {
-      min-width: 0;
-      border: 3px solid #b88e36;
-      background: #0f0805;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), inset 0 0 0 2px #2e160b;
       display: flex;
       flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      min-width: 0;
+      border: 2px solid #b88e36;
+      background: #0f0805;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
       border-radius: 3px;
       overflow: hidden;
+      box-sizing: border-box;
+      position: relative;
     }
 
     .chamber-stage-top {
-      min-height: 48px;
+      min-height: 30px;
+      height: 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      padding: 8px 18px;
+      gap: 8px;
+      padding: 2px 10px;
       color: #ffd875;
       background: #1f1008;
-      border-bottom: 3px solid var(--lamp);
+      border-bottom: 2px solid var(--lamp);
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
-      letter-spacing: 0.5px;
+      font-size: 11px;
+      flex-shrink: 0;
+      box-sizing: border-box;
     }
 
     .chamber-signal-pill {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 3px;
-      letter-spacing: 1px;
+      padding: 2px 10px;
+      border-radius: 2px;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
     }
     .chamber-signal-pill.waiting {
@@ -420,14 +720,26 @@
     @keyframes pulseRedPill { 0% { opacity: 0.8; } 100% { opacity: 1; filter: brightness(1.35); } }
 
     .chamber-scene-wrap {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      width: 100%;
       position: relative;
-      aspect-ratio: 16/9;
       background: #1c110b;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
     #chamberCanvas {
       width: 100%;
       height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
       display: block;
     }
 
@@ -445,51 +757,102 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(14, 9, 6, 0.75);
-      z-index: 5;
-      padding: 18px;
+      background: rgba(14, 9, 6, 0.85);
+      z-index: 25;
+      padding: 8px 12px;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .chamber-card {
-      width: 460px;
-      max-width: 95%;
-      padding: 24px 22px;
+      width: 440px;
+      max-width: 96%;
+      max-height: 96%;
+      overflow-y: auto;
+      padding: 12px 16px;
       text-align: center;
       background: #fbf6ec;
-      border: 4px solid var(--ink);
-      box-shadow: inset 0 0 0 3px var(--lamp), 0 15px 40px rgba(0,0,0,0.8);
+      border: 3px solid var(--ink);
+      box-shadow: inset 0 0 0 2px var(--lamp), 0 15px 40px rgba(0,0,0,0.85);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .chamber-card-eyebrow {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       color: var(--oxblood);
       text-transform: uppercase;
+      margin-bottom: 2px;
     }
     .chamber-card h2 {
       font-family: 'Cinzel', serif;
-      font-size: 20px;
-      line-height: 1.3;
-      margin: 10px 0 12px;
+      font-size: 15px;
+      line-height: 1.2;
+      margin: 2px 0 6px;
       color: var(--ink);
       letter-spacing: 1px;
     }
     .chamber-card p {
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 11px;
+      line-height: 1.35;
       color: var(--ink-muted);
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+      max-width: 380px;
     }
     .chamber-contenders-preview {
       display: flex;
+      align-items: center;
       justify-content: center;
       gap: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
+    }
+    .contender-preview-card {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .contender-preview-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      background: #110b06;
+    }
+    .contender-preview-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: #211b14;
+      font-family: 'Cinzel', serif;
+      line-height: 1.1;
+      max-width: 90px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .contender-preview-role {
+      font-size: 8px;
+      color: #7a6d5d;
+      font-family: 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .contender-vs-badge {
+      font-size: 16px;
+      font-weight: 900;
+      color: #7a2e2e;
+      font-family: 'Cinzel', serif;
+      margin: 0 4px;
     }
     .chamber-thumb {
-      width: 52px;
-      height: 52px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 2px solid var(--lamp);
       background: #110b06;
@@ -499,46 +862,57 @@
 
     .primary-chamber-btn {
       width: 100%;
+      max-width: 300px;
       background: var(--oxblood);
       border: 2px solid #381212;
       color: #fff;
-      padding: 14px;
+      padding: 8px 14px;
       font-family: 'Cinzel', serif;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       text-align: center;
       cursor: pointer;
-      box-shadow: 0 5px 0 #2b0b0b;
+      box-shadow: 0 4px 0 #2b0b0b;
       transition: all 0.1s;
+      flex-shrink: 0;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .primary-chamber-btn:hover { background: #943939; }
-    .primary-chamber-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #2b0b0b; }
+    .primary-chamber-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2b0b0b; }
 
     /* CONTROL DECK */
     .chamber-control-deck {
-      min-height: 88px;
-      padding: 14px 22px;
+      min-height: 46px;
+      height: 46px;
+      padding: 3px 12px;
       display: flex;
-      gap: 18px;
+      gap: 10px;
       align-items: center;
+      justify-content: space-between;
       border-top: 2px solid #b88e36;
       background: linear-gradient(180deg, #2b150b 0%, #1c0c06 100%);
-      box-shadow: inset 0 1px 0 rgba(255, 220, 120, 0.25);
+      flex-shrink: 0;
+      box-sizing: border-box;
     }
-    .chamber-control-deck > div { flex: 1; }
+    .chamber-control-deck > div { flex: 1; min-width: 0; }
     .deck-hint {
-      font-size: 13px;
-      line-height: 1.4;
+      font-size: 11px;
+      line-height: 1.25;
       color: #f7e8ce;
-      margin-top: 4px;
+      margin-top: 1px;
       font-family: 'Libre Caslon Text', serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .deck-eyebrow {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       color: #ffd875;
       text-transform: uppercase;
     }
@@ -546,38 +920,41 @@
     #chamberSitBtn {
       background: linear-gradient(180deg, #6e2020 0%, #3e1010 100%);
       color: #fff4f4;
-      border: 3px solid #d4af37;
-      box-shadow: 0 0 0 2px #260a0a, 0 6px 0 #1b0606, 0 8px 16px rgba(0,0,0,0.6);
-      min-width: 210px;
-      padding: 13px 20px;
+      border: 2px solid #d4af37;
+      box-shadow: 0 0 0 2px #260a0a, 0 4px 0 #1b0606;
+      min-width: 150px;
+      height: 38px;
+      padding: 4px 14px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      gap: 14px;
+      gap: 8px;
       font-family: 'Cinzel', serif;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 1.2px;
+      letter-spacing: 1px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 3px;
       transition: all 0.12s ease;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      flex-shrink: 0;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
     #chamberSitBtn kbd {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
+      padding: 2px 6px;
       border: 1px solid #ffd875;
       background: #2b0b0b;
       color: #ffd875;
-      border-radius: 3px;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.7);
+      border-radius: 2px;
     }
     #chamberSitBtn.slam-ready {
       background: linear-gradient(180deg, #d93838 0%, #871919 100%);
       border-color: #ffe699;
-      box-shadow: 0 0 22px rgba(255, 60, 60, 0.8), 0 0 0 2px #540808, 0 6px 0 #330505;
+      box-shadow: 0 0 18px rgba(255, 60, 60, 0.8), 0 0 0 2px #540808, 0 4px 0 #330505;
       animation: pulseSlamBtn 0.22s infinite alternate ease-in-out;
     }
     @keyframes pulseSlamBtn {
@@ -585,7 +962,7 @@
       100% { transform: scale(1.025); filter: brightness(1.3); }
     }
     #chamberSitBtn:not(:disabled):active {
-      transform: translateY(4px);
+      transform: translateY(2px);
       box-shadow: 0 0 0 2px #260a0a, 0 2px 0 #1b0606;
     }
     #chamberSitBtn:disabled {
@@ -597,35 +974,42 @@
 
     /* ASIDE SIDEBAR */
     .chamber-aside {
-      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      padding: 6px 8px;
       background: linear-gradient(180deg, #24130a 0%, #190c06 100%);
-      border: 3px solid #b88e36;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.6);
+      border: 2px solid #b88e36;
+      box-shadow: inset 0 0 16px rgba(0,0,0,0.7);
       border-radius: 3px;
       color: #f5ebd5;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
     .aside-title-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
-      border-bottom: 2px solid #52311c;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid #52311c;
+      flex-shrink: 0;
     }
     .aside-title-row h4 {
       font-family: 'Cinzel', serif;
-      font-size: 13px;
+      font-size: 11px;
       color: #ffd875;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
     .aside-count-badge {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       background: #472714;
       border: 1px solid #ffd875;
-      padding: 2px 8px;
+      padding: 1px 6px;
       color: #ffd875;
       border-radius: 2px;
     }
@@ -633,48 +1017,57 @@
     .roster-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 4px;
+      flex-shrink: 0;
     }
     .roster-person {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       align-items: center;
       background: #2d180d;
-      padding: 7px 10px;
+      padding: 4px 6px;
       border: 1px solid #5a361d;
       border-radius: 3px;
       transition: all 0.2s ease;
     }
     .roster-person img {
-      width: 40px;
-      height: 40px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #ffd875;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      border: 1.5px solid #ffd875;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      flex-shrink: 0;
     }
     .roster-person strong {
       display: block;
       font-family: 'Libre Caslon Text', serif;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
       color: #ffd875;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .roster-person small {
       display: block;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
+      font-size: 9px;
       color: #bda387;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .roster-person .you-tag {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: #fff;
       background: var(--green);
-      padding: 2px 6px;
+      padding: 1px 4px;
       margin-left: auto;
       border-radius: 2px;
+      flex-shrink: 0;
     }
     .roster-person.out {
       opacity: 0.4;
@@ -687,27 +1080,28 @@
     }
 
     .chamber-rules-box {
-      margin-top: 18px;
-      padding: 12px;
+      margin-top: 6px;
+      padding: 6px;
       background: #1c0e07;
       border: 1px solid #4a2b16;
       border-radius: 3px;
-      font-size: 12px;
+      font-size: 10px;
+      flex-shrink: 0;
     }
     .rules-item {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
-      margin: 7px 0;
-      line-height: 1.35;
+      gap: 6px;
+      margin: 4px 0;
+      line-height: 1.25;
       color: #c9b49b;
     }
     .dot-green, .dot-red {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
-      margin-top: 3px;
+      margin-top: 2px;
     }
     .dot-green { background: #2f6b3d; box-shadow: 0 0 6px #2f6b3d; }
     .dot-red { background: #c52222; box-shadow: 0 0 6px #c52222; }
@@ -717,14 +1111,15 @@
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid #4a2b16;
-      margin-top: 14px;
-      padding-top: 10px;
+      margin-top: 6px;
+      padding-top: 4px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       color: #bda387;
+      flex-shrink: 0;
     }
     .chamber-reflex-stat strong {
-      font-size: 13px;
+      font-size: 11px;
       color: #ffd875;
     }
 
@@ -732,31 +1127,112 @@
        CERTIFICATE OF EMPLOYMENT (1200x675 Canvas Modal)
        ========================================================================== */
     .cert-modal-overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
       background: rgba(10, 8, 6, 0.94);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 150;
+      z-index: 12000;
       padding: 16px;
-      position: fixed;
+      overflow-y: auto;
     }
     .cert-modal-overlay.active { display: flex; }
     .cert-container {
       max-width: 1060px;
       width: 100%;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .cert-controls-panel {
+      background: #fbf6ec;
+      border: 2px solid var(--lamp);
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(185, 144, 47, 0.35);
+      padding: 8px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px 22px;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .cert-control-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cert-control-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #4a3622;
+      white-space: nowrap;
+    }
+    .cert-control-select,
+    .cert-control-input {
+      background: #fffcf5;
+      border: 1px solid var(--rule);
+      height: 30px;
+      padding: 4px 10px;
+      font-family: 'Cinzel', serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--oxblood);
+      border-radius: 3px;
+      outline: none;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+    .cert-control-select:focus,
+    .cert-control-input:focus {
+      border-color: var(--lamp);
+    }
+    .cert-control-input {
+      width: 140px;
+    }
+    .cert-control-btn {
+      height: 30px;
+      padding: 0 12px !important;
+      font-family: 'IBM Plex Mono', monospace !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: #ede3cc !important;
+      border: 1px solid var(--ink) !important;
+      color: var(--ink) !important;
+      border-radius: 3px !important;
+      box-shadow: 0 2px 0 var(--rule) !important;
+      transition: all 0.15s ease !important;
+      box-sizing: border-box !important;
+    }
+    .cert-control-btn:hover {
+      background: var(--oxblood) !important;
+      color: #fff !important;
+      border-color: var(--ink) !important;
     }
     #certCanvas {
       width: 100%;
       height: auto;
-      max-height: 80vh;
+      aspect-ratio: 16 / 9;
+      max-width: min(1020px, 100%, calc((92vh - 160px) * 16 / 9));
       border: 4px solid var(--lamp);
       box-shadow: 0 20px 60px rgba(0,0,0,0.9);
       background: #fbf7ee;
       margin-bottom: 14px;
       display: block;
+      object-fit: contain;
     }
   
     /* ==========================================================================
@@ -828,20 +1304,20 @@
       100% { transform: translateY(3px); opacity: 1; }
     }
 
-    /* ACTIVE QUEST PANEL (Top Right) */
+    /* ACTIVE QUEST PANEL (Top Right directly below controls) */
     .active-quest-panel {
-      position: fixed;
-      top: 66px;
-      right: 16px;
+      position: relative;
       width: 320px;
+      max-width: 100%;
       background: rgba(253, 250, 242, 0.96);
       border: 3px solid #211b14;
       border-radius: 4px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.4), inset 0 0 0 1px #b9902f;
       padding: 10px 14px;
       font-family: 'IBM Plex Mono', monospace;
-      z-index: 100;
       transition: border-color 0.3s;
+      pointer-events: auto;
+      box-sizing: border-box;
     }
     .quest-flash {
       animation: questFlashBorder 0.6s 2 ease;
@@ -880,26 +1356,7 @@
       color: #4f4335;
       line-height: 1.4;
     }
-    .interact-prompt {
-      position: fixed !important;
-      bottom: 108px !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      background: #18120b !important;
-      color: #fff9ea !important;
-      padding: 8px 18px !important;
-      font-family: 'IBM Plex Mono', monospace !important;
-      font-size: 13px !important;
-      font-weight: 700 !important;
-      border: 2px solid #b9902f !important;
-      border-radius: 4px !important;
-      z-index: 105 !important;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.75), inset 0 0 8px rgba(185,144,47,0.3) !important;
-      letter-spacing: 0.5px !important;
-      pointer-events: none !important;
-    }
 
-  
     /* Authentic 1987 Corporate CRT Scanline & Warm Vignette Environment */
     .retro-crt-overlay {
       position: fixed;
@@ -916,54 +1373,1064 @@
       opacity: 0.85;
     }
 
+    /* ==========================================================================
+       MOBILE TOUCH CONTROLS (VIRTUAL JOYSTICK & STAMP ACTION BUTTON)
+       ========================================================================== */
+    .mobile-controls-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 98;
+      display: none;
+    }
+
+    @media (hover: none) and (pointer: coarse), (max-width: 1024px) {
+      .mobile-controls-layer {
+        display: block;
+      }
+    }
+
+    /* Cleanly hide all top HUD, touch controls, floating prompt, and active quest tracker whenever ANY modal or arena is open */
+    body.in-modal .game-top-hud,
+    body.in-modal #gameTopHud,
+    body.in-modal .hud-panel,
+    body.in-modal .hud-controls-top,
+    body.in-modal .active-quest-panel,
+    body.in-modal .mobile-controls-layer,
+    body.in-modal #mobileControls,
+    body.in-modal #joystickZone,
+    body.in-modal .interact-prompt,
+    body.in-modal .retro-guide-box,
+    body.in-arena .game-top-hud,
+    body.in-arena #gameTopHud,
+    body.in-arena .hud-panel,
+    body.in-arena .hud-controls-top,
+    body.in-arena .active-quest-panel,
+    body.in-arena .mobile-controls-layer,
+    body.in-arena #mobileControls,
+    body.in-arena #joystickZone,
+    body.in-arena .interact-prompt,
+    body.in-arena .retro-guide-box,
+    body:has(.modal-backdrop.active) .game-top-hud,
+    body:has(.modal-backdrop.active) #gameTopHud,
+    body:has(.modal-backdrop.active) .hud-panel,
+    body:has(.modal-backdrop.active) .hud-controls-top,
+    body:has(.modal-backdrop.active) .active-quest-panel,
+    body:has(.modal-backdrop.active) .mobile-controls-layer,
+    body:has(.modal-backdrop.active) #mobileControls,
+    body:has(.modal-backdrop.active) #joystickZone,
+    body:has(.modal-backdrop.active) .interact-prompt,
+    body:has(.modal-backdrop.active) .retro-guide-box,
+    body:has(.musical-arena-overlay.active) .game-top-hud,
+    body:has(.musical-arena-overlay.active) #gameTopHud,
+    body:has(.musical-arena-overlay.active) .hud-panel,
+    body:has(.musical-arena-overlay.active) .hud-controls-top,
+    body:has(.musical-arena-overlay.active) .active-quest-panel,
+    body:has(.musical-arena-overlay.active) .mobile-controls-layer,
+    body:has(.musical-arena-overlay.active) #mobileControls,
+    body:has(.musical-arena-overlay.active) #joystickZone,
+    body:has(.musical-arena-overlay.active) .interact-prompt,
+    body:has(.musical-arena-overlay.active) .retro-guide-box,
+    body:has(.cert-modal-overlay.active) .game-top-hud,
+    body:has(.cert-modal-overlay.active) #gameTopHud,
+    body:has(.cert-modal-overlay.active) .hud-panel,
+    body:has(.cert-modal-overlay.active) .hud-controls-top,
+    body:has(.cert-modal-overlay.active) .active-quest-panel,
+    body:has(.cert-modal-overlay.active) .mobile-controls-layer,
+    body:has(.cert-modal-overlay.active) #mobileControls,
+    body:has(.cert-modal-overlay.active) #joystickZone,
+    body:has(.cert-modal-overlay.active) .interact-prompt,
+    body:has(.cert-modal-overlay.active) .retro-guide-box {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    .joystick-zone {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      width: 136px;
+      height: 136px;
+      pointer-events: auto;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .joystick-base {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, rgba(35, 27, 20, 0.7) 0%, rgba(18, 14, 10, 0.88) 100%);
+      border: 2px solid rgba(185, 144, 47, 0.75);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65), inset 0 0 16px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(255, 216, 117, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .joystick-base::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(185, 144, 47, 0.45);
+    }
+
+    .joystick-knob {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffd875 0%, #b08a3c 55%, #4a2c0c 100%);
+      border: 2px solid #fffdf7;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+      transform: translate(0px, 0px);
+      transition: transform 0.05s ease-out;
+      will-change: transform;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       FORCED HORIZONTAL ORIENTATION LOCK OVERLAY (PHONE / MOBILE ONLY)
+       ========================================================================== */
+    .orientation-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: radial-gradient(circle at center, #261610 0%, #0d0805 100%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* Shown whenever the screen is portrait (height > width) on mobile / phone viewports */
+    @media screen and (orientation: portrait) and (max-width: 1024px) {
+      .orientation-overlay {
+        display: flex !important;
+      }
+      /* Hide background game UI during portrait lock */
+      .game-top-hud, .hud-panel, .active-quest-panel, .hud-controls-top, .mobile-controls-layer, .interact-prompt {
+        display: none !important;
+      }
+    }
+
+    @media screen and (orientation: landscape) {
+      .orientation-overlay {
+        display: none !important;
+      }
+    }
+
+    .orientation-box {
+      background: #18110b;
+      border: 3px solid #b9902f;
+      outline: 2px solid #7a2e2e;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 24px rgba(0, 0, 0, 0.9);
+      border-radius: 8px;
+      padding: 26px 18px;
+      max-width: 330px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .orientation-crt-scanline {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 12, 0) 50%, rgba(0, 0, 0, 0.28) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .orientation-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      color: #ffd875;
+      background: #7a2e2e;
+      padding: 3px 8px;
+      border-radius: 2px;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    .orientation-phone-anim {
+      width: 76px;
+      height: 76px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .phone-device {
+      width: 32px;
+      height: 52px;
+      border: 3px solid #ffd875;
+      border-radius: 6px;
+      background: #0d0805;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.8);
+      animation: rotatePhone 2.4s infinite ease-in-out;
+      transform-origin: center center;
+    }
+
+    .phone-screen {
+      width: 22px;
+      height: 38px;
+      background: rgba(185, 144, 47, 0.25);
+      border-radius: 2px;
+      border: 1px dashed rgba(255, 216, 117, 0.5);
+    }
+
+    .rotate-arrow-svg {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      animation: pulseRotateArrow 2.4s infinite ease-in-out;
+    }
+
+    @keyframes rotatePhone {
+      0%, 15% { transform: rotate(0deg); }
+      50%, 75% { transform: rotate(90deg); }
+      90%, 100% { transform: rotate(0deg); }
+    }
+
+    @keyframes pulseRotateArrow {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 6px #ffd875); }
+    }
+
+    .orientation-title {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff9ea;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .orientation-sub {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: #e5a93c;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .orientation-desc {
+      font-family: 'Libre Caslon Text', serif;
+      font-size: 12px;
+      color: #d1c5b0;
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    .orientation-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 900;
+      color: #fff9ea;
+      background: linear-gradient(180deg, #943939 0%, #631d1d 100%);
+      border: 2px solid #ffd875;
+      padding: 9px 16px;
+      border-radius: 4px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s ease;
+    }
+    .orientation-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* TAP TO USE POPUP TEXT (PHONE ONLY TACTILE BUTTON - DOCKED BOTTOM-RIGHT TO PREVENT JOYSTICK OVERLAP) */
+    @media (hover: none) and (pointer: coarse), (max-width: 1024px) {
+      .interact-prompt {
+        position: fixed !important;
+        bottom: 16px !important;
+        right: 18px !important;
+        left: auto !important;
+        transform: none !important;
+        background: linear-gradient(180deg, #381914 0%, #1a0b07 100%) !important;
+        color: #fff9ea !important;
+        border: 2px solid #ffd875 !important;
+        outline: 2px solid #7a2e2e !important;
+        padding: 7px 12px !important;
+        font-family: 'IBM Plex Mono', monospace !important;
+        font-size: 10.5px !important;
+        font-weight: 700 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.9), 0 0 14px rgba(255, 216, 117, 0.4), inset 0 1px 2px rgba(255,255,255,0.3) !important;
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -webkit-tap-highlight-color: transparent;
+        width: auto !important;
+        max-width: min(calc(100vw - 180px), 230px) !important;
+        text-align: center !important;
+        white-space: normal !important;
+        line-height: 1.25 !important;
+        z-index: 1000 !important;
+        animation: pulsePromptTouch 0.8s infinite alternate ease-in-out !important;
+      }
+      .interact-prompt:active {
+        transform: scale(0.94) !important;
+        background: #7a2e2e !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.95), inset 0 2px 4px rgba(0,0,0,0.7) !important;
+      }
+    }
+
+    @keyframes pulsePromptTouch {
+      0% {
+        box-shadow: 0 6px 18px rgba(0,0,0,0.85), 0 0 8px rgba(255, 216, 117, 0.35);
+        border-color: #ffd875;
+      }
+      100% {
+        box-shadow: 0 8px 26px rgba(0,0,0,0.95), 0 0 20px rgba(255, 216, 117, 0.85);
+        border-color: #ffffff;
+      }
+    }
+
+    /* ==========================================================================
+       RESPONSIVE MOBILE & TABLET LAYOUT OVERRIDES (Zero overlap, perfectly fitted)
+       ========================================================================== */
+    @media (max-width: 1080px) {
+      .game-top-hud {
+        padding: 10px 12px;
+        gap: 6px 12px;
+      }
+      .btn-desktop-text {
+        display: none !important;
+      }
+      .btn-mobile-text {
+        display: inline !important;
+      }
+      .hud-btn {
+        height: 30px;
+        padding: 0 8px;
+        font-size: 10px;
+        gap: 4px;
+      }
+      .hud-panel {
+        max-width: 360px;
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .hud-medallion {
+        width: 42px;
+        height: 42px;
+      }
+      .active-quest-panel {
+        width: 290px;
+        padding: 8px 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* 1. Top HUD & Controls Flex Row */
+      .game-top-hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 6px 8px;
+        gap: 8px;
+      }
+      .hud-right-col {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        max-width: min(300px, 48vw);
+      }
+      .hud-panel {
+        max-width: 100%;
+        padding: 6px 8px;
+        gap: 8px;
+        border-width: 2px;
+      }
+      .hud-medallion {
+        width: 36px;
+        height: 36px;
+      }
+      .hud-details h1 {
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        line-height: 1.1;
+      }
+      .hud-details .sub {
+        font-size: 9px;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-top: 1px;
+      }
+      .hud-stats-row {
+        gap: 4px;
+        margin-top: 2px;
+        font-size: 8px;
+        flex-wrap: wrap;
+      }
+      .hud-stat-badge {
+        padding: 1px 4px;
+        font-size: 8px;
+      }
+
+      .hud-controls-top {
+        gap: 4px;
+        align-self: start;
+      }
+      .hud-btn {
+        height: 28px;
+        padding: 0 7px;
+        font-size: 9.5px;
+        gap: 3px;
+      }
+      .btn-desktop-text {
+        display: none !important;
+      }
+      .btn-mobile-text {
+        display: inline !important;
+      }
+
+      /* 2. Collapsible Active Quest Panel (Full width beneath header) */
+      .active-quest-panel {
+        justify-self: stretch;
+        width: auto;
+        max-width: 100%;
+        padding: 6px 10px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .quest-toggle-arrow {
+        display: inline !important;
+      }
+      .active-quest-panel.collapsed #questObjective {
+        display: none;
+      }
+      .active-quest-panel.collapsed .quest-title {
+        font-size: 11px;
+        margin-bottom: 0;
+      }
+      .active-quest-panel.collapsed {
+        padding: 4px 8px;
+      }
+
+      /* 3. Toast Memo (Cleanly stacks above the proximity prompt) */
+      .toast-memo {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        bottom: 76px !important;
+        width: min(440px, 92vw) !important;
+        max-width: 92vw !important;
+        padding: 10px 14px;
+        font-size: 11px;
+        text-align: center !important;
+        z-index: 2500 !important;
+        pointer-events: auto !important;
+      }
+      .toast-memo strong,
+      .toast-memo p {
+        text-align: center !important;
+      }
+
+      /* 4. Retro Guide Dialog Box */
+      .retro-guide-box {
+        bottom: 12px;
+        width: 95vw;
+        padding: 10px 14px 12px;
+      }
+      .retro-guide-content {
+        font-size: 12px;
+        line-height: 1.4;
+        padding-right: 10px;
+      }
+      .retro-guide-cursor {
+        font-size: 9px;
+        bottom: 6px;
+        right: 10px;
+      }
+
+      /* 5. Musical Chairs Arena Modal */
+      .musical-arena-overlay {
+        padding: 0 !important;
+        overflow: hidden !important;
+        z-index: 600 !important;
+      }
+      .chamber-cabinet {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-width: 2px;
+        outline: none;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .chamber-header {
+        min-height: 38px;
+        padding: 4px 10px;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .chamber-brand {
+        gap: 6px;
+      }
+      .chamber-seal {
+        width: 24px;
+        height: 24px;
+      }
+      .chamber-title-text h2 {
+        font-size: 11px;
+        letter-spacing: 0.5px;
+      }
+      .chamber-title-text small {
+        font-size: 8px;
+      }
+      .chamber-head-actions {
+        gap: 5px;
+      }
+      .chamber-btn {
+        padding: 4px 7px;
+        font-size: 9px;
+      }
+      .chamber-body {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(150px, 190px) !important;
+        padding: 4px 6px !important;
+        gap: 6px !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+      .chamber-stage {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+      .chamber-stage-top {
+        min-height: 28px;
+        padding: 2px 8px;
+        font-size: 9px;
+        flex-shrink: 0;
+      }
+      .chamber-signal-pill {
+        font-size: 8px;
+        padding: 1px 6px;
+      }
+      .chamber-scene-wrap {
+        flex: 1;
+        min-height: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+      #chamberCanvas {
+        max-height: 100% !important;
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+      }
+      .chamber-control-deck {
+        min-height: 38px;
+        padding: 4px 8px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .deck-eyebrow {
+        font-size: 8px;
+        letter-spacing: 0.5px;
+      }
+      .deck-hint {
+        font-size: 9px;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #chamberSitBtn {
+        width: auto;
+        min-width: 110px;
+        padding: 6px 12px;
+        font-size: 11px;
+        justify-content: center;
+      }
+      .chamber-card {
+        padding: 8px 12px;
+        max-height: 96%;
+        overflow-y: auto;
+      }
+      .chamber-card-eyebrow {
+        font-size: 9px;
+        margin-bottom: 1px;
+      }
+      .chamber-card h2 {
+        font-size: 13px;
+        margin: 2px 0 4px;
+      }
+      .chamber-card p {
+        font-size: 9.5px;
+        line-height: 1.25;
+        margin-bottom: 6px;
+      }
+      .chamber-contenders-preview {
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .contender-preview-thumb {
+        width: 32px;
+        height: 32px;
+      }
+      .contender-preview-name {
+        font-size: 9px;
+      }
+      .contender-preview-role {
+        font-size: 7.5px;
+      }
+      .contender-vs-badge {
+        font-size: 13px;
+      }
+      .primary-chamber-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+        max-width: 260px;
+      }
+      .chamber-aside {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        padding: 6px 4px !important;
+        gap: 4px !important;
+        overflow-y: auto !important;
+      }
+      .aside-title-row {
+        margin-bottom: 2px;
+      }
+      .aside-title-row h4 {
+        font-size: 10px;
+      }
+      .roster-list {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        max-height: 130px;
+        overflow-y: auto;
+      }
+      .roster-item {
+        padding: 2px 4px;
+        gap: 4px;
+      }
+      .roster-avatar {
+        width: 16px;
+        height: 16px;
+      }
+      .roster-info-row strong {
+        font-size: 9px;
+      }
+      .roster-info-row small {
+        font-size: 8px;
+      }
+      .chamber-rules-box {
+        display: none !important;
+      }
+      .chamber-reflex-stat {
+        padding: 3px 5px;
+        font-size: 8px;
+      }
+
+      /* 6. Standard Modals */
+      .modal-backdrop {
+        padding: 8px;
+        z-index: 500 !important;
+      }
+      .modal-window {
+        padding: 12px;
+        max-height: 94vh;
+        overflow-y: auto;
+        max-width: 96vw;
+      }
+      .modal-header-row h3 {
+        font-size: 14px;
+      }
+      .elevator-modal-window {
+        padding: 10px 14px !important;
+        max-height: 94vh !important;
+      }
+      .elevator-floor-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+        gap: 5px 8px !important;
+        max-height: min(240px, 55vh) !important;
+      }
+      .elevator-floor-card {
+        padding: 5px 8px !important;
+        gap: 6px !important;
+      }
+      .elevator-card-title {
+        font-size: 10.5px !important;
+      }
+      .elevator-card-sub {
+        font-size: 8px !important;
+      }
+      .elevator-desc-text {
+        font-size: 10px !important;
+        margin-bottom: 6px !important;
+      }
+      .elevator-bottom-row {
+        margin-top: 8px !important;
+      }
+      .elevator-close-btn {
+        height: 26px !important;
+        padding: 0 12px !important;
+        font-size: 10.5px !important;
+      }
+      #elevatorFloorList {
+        max-height: min(240px, 55vh) !important;
+        overflow-y: auto;
+      }
+
+      /* 7. Certificate Modal */
+      .cert-modal-overlay {
+        padding: 8px;
+        overflow-y: auto;
+        z-index: 12000 !important;
+      }
+      .cert-container {
+        max-height: 98vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #certCanvas {
+        max-width: min(100%, calc((96vh - 150px) * 16 / 9));
+        aspect-ratio: 16 / 9;
+        height: auto;
+        margin-bottom: 8px;
+      }
+      .cert-controls-panel {
+        padding: 6px 8px;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .cert-control-label {
+        font-size: 10px;
+      }
+      .cert-control-select,
+      .cert-control-input,
+      .cert-control-btn {
+        height: 28px;
+        font-size: 11px !important;
+      }
+      .cert-control-input {
+        width: 130px;
+      }
+    }
+
+    @media (max-height: 520px) and (orientation: landscape) {
+      .game-top-hud {
+        padding: 4px 8px;
+        gap: 4px 8px;
+      }
+      .hud-panel {
+        padding: 3px 6px;
+        gap: 6px;
+        max-width: 320px;
+      }
+      .hud-medallion {
+        width: 28px;
+        height: 28px;
+      }
+      .hud-details h1 {
+        font-size: 10px;
+      }
+      .hud-details .sub {
+        font-size: 8.5px;
+      }
+      .hud-stats-row {
+        margin-top: 1px;
+        gap: 3px;
+        font-size: 7.5px;
+      }
+      .hud-stat-badge {
+        padding: 1px 3px;
+        font-size: 7.5px;
+      }
+      .hud-btn {
+        height: 26px;
+        padding: 0 6px;
+        font-size: 9px;
+      }
+      .active-quest-panel {
+        max-width: 250px;
+        padding: 4px 8px;
+        font-size: 9.5px;
+      }
+      .active-quest-panel .quest-title {
+        font-size: 10px;
+        margin-bottom: 2px;
+      }
+      .active-quest-panel .quest-objective {
+        font-size: 9px;
+        line-height: 1.2;
+      }
+      .joystick-zone {
+        bottom: 8px;
+        left: 8px;
+      }
+      #certCanvas {
+        max-width: min(100%, calc((94vh - 110px) * 16 / 9));
+        aspect-ratio: 16 / 9;
+        height: auto;
+        margin-bottom: 6px;
+      }
+      .cert-controls-panel {
+        padding: 4px 8px;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+      .cert-control-label {
+        font-size: 9px;
+      }
+      .cert-control-select,
+      .cert-control-input,
+      .cert-control-btn {
+        height: 24px;
+        font-size: 10px !important;
+      }
+      .cert-control-input {
+        width: 110px;
+      }
+      .elevator-modal-window {
+        padding: 6px 12px !important;
+        max-height: 96vh !important;
+      }
+      .elevator-floor-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 4px 6px !important;
+        max-height: 58vh !important;
+      }
+      .elevator-floor-card {
+        padding: 4px 8px !important;
+        gap: 4px !important;
+      }
+      .elevator-card-title {
+        font-size: 10px !important;
+      }
+      .elevator-card-sub {
+        font-size: 7.5px !important;
+      }
+      .elevator-desc-text {
+        font-size: 9px !important;
+        margin-bottom: 3px !important;
+        line-height: 1.15 !important;
+      }
+      .elevator-header-row {
+        margin-bottom: 2px !important;
+        padding-bottom: 3px !important;
+      }
+      .elevator-header-row h3 {
+        font-size: 12px !important;
+      }
+      .elevator-bottom-row {
+        margin-top: 5px !important;
+      }
+      .elevator-close-btn {
+        height: 22px !important;
+        padding: 0 10px !important;
+        font-size: 9.5px !important;
+      }
+      #elevatorFloorList {
+        max-height: 58vh !important;
+      }
+      .toast-memo {
+        bottom: 52px !important;
+        max-width: 380px !important;
+        padding: 6px 12px !important;
+        font-size: 10px !important;
+      }
+      .toast-memo strong {
+        font-size: 10.5px !important;
+      }
+      .toast-memo p {
+        font-size: 9px !important;
+        margin-top: 2px !important;
+      }
+      .modal-window {
+        max-height: 95vh !important;
+        padding: 8px 12px !important;
+      }
+      .chamber-cabinet {
+        height: 100vh !important;
+        max-height: 100vh !important;
+      }
+      .chamber-body {
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+      .chamber-rules-box {
+        display: none !important;
+      }
+    }
+
+    @media (max-height: 520px) {
+      .chamber-card {
+        padding: 5px 10px !important;
+        max-height: 98% !important;
+      }
+      .chamber-card-eyebrow {
+        font-size: 8.5px !important;
+        margin-bottom: 0 !important;
+      }
+      .chamber-card h2 {
+        font-size: 11px !important;
+        margin: 1px 0 3px !important;
+      }
+      .chamber-card p {
+        font-size: 9px !important;
+        line-height: 1.2 !important;
+        margin-bottom: 4px !important;
+      }
+      .chamber-contenders-preview {
+        gap: 6px !important;
+        margin-bottom: 4px !important;
+      }
+      .contender-preview-thumb {
+        width: 28px !important;
+        height: 28px !important;
+      }
+      .contender-preview-name {
+        font-size: 8.5px !important;
+      }
+      .contender-preview-role {
+        font-size: 7px !important;
+      }
+      .contender-vs-badge {
+        font-size: 12px !important;
+      }
+      .primary-chamber-btn {
+        padding: 5px 8px !important;
+        font-size: 10px !important;
+        max-width: 240px !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Force Horizontal (Landscape) Orientation Overlay for Phone -->
+  <div class="orientation-overlay" id="orientationOverlay">
+    <div class="orientation-box">
+      <div class="orientation-crt-scanline"></div>
+      <div class="orientation-badge">TERMINAL DISPLAY LOCK</div>
+      <div class="orientation-phone-anim">
+        <div class="phone-device">
+          <div class="phone-screen"></div>
+        </div>
+        <svg class="rotate-arrow-svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffd875" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+      </div>
+      <div class="orientation-title">PLEASE ROTATE DEVICE</div>
+      <div class="orientation-sub">LANDSCAPE ORIENTATION REQUIRED</div>
+      <div class="orientation-desc">
+        The Mutual Fun mainframe (1987 Architecture) requires a horizontal widescreen terminal view. Please rotate your phone sideways.
+      </div>
+      <button class="orientation-btn" id="orientationEnterBtn" onclick="requestFullScreenAndLandscape()">
+        <span>⛶</span> ROTATE & ENTER FULLSCREEN
+      </button>
+    </div>
+  </div>
+
   <div class="retro-crt-overlay"></div>
   <!-- Three.js 3D Viewport -->
   <canvas id="canvas3d"></canvas>
   <div class="crt-overlay"></div>
 
-  <!-- HUD Top Left -->
-  <div class="hud-panel">
-    <img id="hudMedallion" class="hud-medallion" alt="TMF Seal">
-    <div class="hud-details">
-      <h1 id="hudRole">Applicant</h1>
-      <div class="sub" id="hudFloor">The Pavement · Outside Gate</div>
-      <div class="hud-stats-row">
-        <span class="hud-stat-badge" id="hudDept">The Bogle Fund</span>
-        <span class="hud-stat-badge" id="hudChair">No Chair Secured</span>
-        <span class="hud-stat-badge" id="hudScore">0 Pts</span>
+  <!-- Unified Game Top HUD -->
+  <div class="game-top-hud" id="gameTopHud">
+    <!-- HUD Top Left -->
+    <div class="hud-panel" id="hudPanel">
+      <img id="hudMedallion" class="hud-medallion" alt="TMF Seal">
+      <div class="hud-details">
+        <h1 id="hudRole">Applicant</h1>
+        <div class="sub" id="hudFloor">The Pavement · Outside Gate</div>
+        <div class="hud-stats-row">
+          <span class="hud-stat-badge" id="hudDept">The Bogle Fund</span>
+          <span class="hud-stat-badge" id="hudChair">No Chair Secured</span>
+          <span class="hud-stat-badge" id="hudScore">0 Pts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUD Top Right Column (Controls & Directive Dock) -->
+    <div class="hud-right-col" id="hudRightCol">
+      <div class="hud-controls-top" id="hudControlsTop">
+        <button class="hud-btn" id="hudFullscreenBtn" onclick="toggleFullScreen()" title="Toggle Fullscreen Mode">
+          <span id="hudFullscreenIcon">⛶</span> <span class="btn-desktop-text">Fullscreen</span><span class="btn-mobile-text" style="display:none;">FULL</span>
+        </button>
+        <button class="hud-btn" id="hudMusicBtn" onclick="toggleFloorBGM()" title="Toggle 90s Vibe Ambient Music">
+          <span id="hudMusicIcon">📻</span> <span id="hudMusicText"><span class="btn-desktop-text">MUSIC: ON</span><span class="btn-mobile-text" style="display:none;">BGM</span></span>
+        </button>
+        <button class="hud-btn" onclick="openCertModal()" title="View & Download Employment Certificate">
+          <span style="color:var(--oxblood);">📜</span> <span class="btn-desktop-text">Employment Certificate</span><span class="btn-mobile-text" style="display:none;">CERT</span>
+        </button>
+        <button class="hud-btn hud-btn-reset" onclick="confirmResetGame()" title="Reset Personnel Record & Game">
+          <span style="font-size:12px;line-height:1;">↺</span> <span class="btn-desktop-text">Restart</span><span class="btn-mobile-text" style="display:none;">RESET</span>
+        </button>
+      </div>
+
+      <!-- Active Quest Tracker (Top Right) -->
+      <div class="active-quest-panel" id="activeQuestPanel" onclick="toggleQuestPanelCollapse()">
+        <div class="quest-eyebrow">
+          <span>DIRECTIVE ON RECORD</span>
+          <span class="quest-toggle-arrow" id="questToggleArrow" style="display:none;font-size:10px;margin-left:auto;padding-right:6px;color:var(--lamp);">▼</span>
+          <span class="quest-status-pill" id="questStatusPill">ACTIVE</span>
+        </div>
+        <div class="quest-title" id="questTitle">Floor 0: Seek Admission</div>
+        <div class="quest-objective" id="questObjective">Climb the granite stairs and enter the ground lobby to speak with the Security Gatekeeper.</div>
       </div>
     </div>
   </div>
 
-  <!-- HUD Top Right Controls -->
-  <div class="hud-controls-top">
-    <button class="hud-btn" id="hudMusicBtn" onclick="toggleFloorBGM()" title="Toggle 90s Vibe Ambient Music">
-      <span id="hudMusicIcon">📻</span> <span id="hudMusicText">MUSIC: ON</span>
-    </button>
-    <button class="hud-btn" onclick="openCertModal()">
-      <span style="color:var(--oxblood);">📜</span> Employment Certificate
-    </button>
-    <button class="hud-btn" onclick="confirmResetGame()" style="color:#a84848;">
-      Restart
-    </button>
-  </div>
-
-  
-  <!-- Active Quest Tracker (Top Right) -->
-  <div class="active-quest-panel" id="activeQuestPanel">
-    <div class="quest-eyebrow">
-      <span>DIRECTIVE ON RECORD</span>
-      <span class="quest-status-pill" id="questStatusPill">ACTIVE</span>
-    </div>
-    <div class="quest-title" id="questTitle">Floor 0: Seek Admission</div>
-    <div class="quest-objective" id="questObjective">Climb the granite stairs and enter the ground lobby to speak with the Security Gatekeeper.</div>
-  </div>
-
   <!-- Retro Blocking Guide Box -->
-  <div class="retro-guide-box" id="retroGuideBox" style="display:none;opacity:0;">
+  <div class="retro-guide-box" id="retroGuideBox" onclick="advanceGuide()" style="display:none;opacity:0;cursor:pointer;">
     <div class="retro-guide-header">
       <span class="retro-guide-badge" id="retroGuideTag">GUIDE</span>
       <span class="retro-guide-sub" id="retroGuideSub">THE MUTUAL FUN · 1987</span>
@@ -972,8 +2439,17 @@
     <div class="retro-guide-cursor" id="retroGuideCursor"></div>
   </div>
 
-  <!-- Floating Proximity Prompt -->
-  <div class="interact-prompt" id="interactPrompt">[E] Inspect Gate</div>
+  <!-- Floating Proximity Prompt (Tap To Use on phone & click on desktop) -->
+  <div class="interact-prompt" id="interactPrompt" onclick="onInteractPromptClick(event)">[TAP] Inspect Gate</div>
+
+  <!-- Virtual Touch Mobile Controls Layer -->
+  <div class="mobile-controls-layer" id="mobileControls">
+    <div class="joystick-zone" id="joystickZone">
+      <div class="joystick-base">
+        <div class="joystick-knob" id="joystickKnob"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Memo -->
   <div class="toast-memo" id="toastMemo" onclick="dismissMemoToast()" style="cursor:pointer;" title="Click to dismiss">
@@ -997,17 +2473,17 @@
 
   <!-- Elevator Concourse Modal -->
   <div class="modal-backdrop" id="elevatorModal">
-    <div class="modal-window">
-      <div class="modal-header-row">
+    <div class="modal-window elevator-modal-window">
+      <div class="modal-header-row elevator-header-row">
         <h3>ELEVATOR CONCOURSE</h3>
         <span style="font-family:'IBM Plex Mono';font-size:11px;color:var(--lamp);">BRASS CAR C-4</span>
       </div>
-      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:14px;">
-        Floor clearance is governed by review points and chair ownership. Select an authorized destination:
+      <p class="elevator-desc-text">
+        Floor clearance governed by review score. Select destination:
       </p>
-      <div id="elevatorFloorList" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;padding-right:6px;"></div>
-      <div style="margin-top:18px;display:flex;justify-content:flex-end;">
-        <button class="desk-button secondary" onclick="closeElevatorModal()">Remain on Floor</button>
+      <div id="elevatorFloorList" class="elevator-floor-grid"></div>
+      <div class="elevator-bottom-row">
+        <button class="desk-button secondary elevator-close-btn" onclick="closeElevatorModal()">Remain on Floor</button>
       </div>
     </div>
   </div>
@@ -1046,36 +2522,36 @@
             </div>
           </div>
 
-          <div class="chamber-scene-wrap" id="arenaSceneWrap">
+          <div class="chamber-scene-wrap" id="arenaSceneWrap" onpointerdown="onArenaSceneTap(event)">
             <canvas id="chamberCanvas" width="960" height="540"></canvas>
+          </div>
 
-            <!-- Intro / Guide Screen Overlay -->
-            <div class="chamber-overlay" id="arenaIntroOverlay">
-              <div class="chamber-card">
-                <div class="chamber-card-eyebrow" id="introFloorEyebrow">FLOOR 1 CHAIR DISPUTE</div>
-                <h2 id="introChairTitle">THE INTERN'S FOLDING CHAIR</h2>
-                <p id="introGuideBody">
-                  Circle the parquet marquetry while the department phonograph spins. When the needle scratches and the boardroom bell tolls, seize an available seat immediately.
-                </p>
-                <div class="chamber-contenders-preview" id="introContendersPreview"></div>
-                <button class="primary-chamber-btn" onclick="startArenaMatch()">
-                  ENTER CHAMBER [SPACE]
-                </button>
-              </div>
+          <!-- Intro / Guide Screen Overlay -->
+          <div class="chamber-overlay" id="arenaIntroOverlay">
+            <div class="chamber-card">
+              <div class="chamber-card-eyebrow" id="introFloorEyebrow">FLOOR 1 CHAIR DISPUTE</div>
+              <h2 id="introChairTitle">THE INTERN'S FOLDING CHAIR</h2>
+              <p id="introGuideBody">
+                Circle the floor while the phonograph spins. When the needle scratches, seize the chair immediately!
+              </p>
+              <div class="chamber-contenders-preview" id="introContendersPreview"></div>
+              <button class="primary-chamber-btn" id="arenaIntroBtn" onclick="startArenaMatch()">
+                ENTER CHAMBER <span id="introKeyHint">[SPACE]</span>
+              </button>
             </div>
+          </div>
 
-            <!-- Result Overlay -->
-            <div class="chamber-overlay hidden" id="arenaResultOverlay">
-              <div class="chamber-card">
-                <div class="chamber-card-eyebrow" id="resultKicker">ROUND COMPLETE</div>
-                <h2 id="resultTitle">SEAT SECURED</h2>
-                <p id="resultBody">
-                  Rival eliminated. Next up: 3 contenders, 2 chairs.
-                </p>
-                <button class="primary-chamber-btn" id="resultBtn" onclick="onResultBtnClick()">
-                  NEXT ROUND [SPACE]
-                </button>
-              </div>
+          <!-- Result Overlay -->
+          <div class="chamber-overlay hidden" id="arenaResultOverlay">
+            <div class="chamber-card">
+              <div class="chamber-card-eyebrow" id="resultKicker">ROUND COMPLETE</div>
+              <h2 id="resultTitle">SEAT SECURED</h2>
+              <p id="resultBody">
+                Rival eliminated. Next up: 3 contenders, 2 chairs.
+              </p>
+              <button class="primary-chamber-btn" id="resultBtn" onclick="onResultBtnClick()">
+                NEXT ROUND <span id="resultKeyHint">[SPACE]</span>
+              </button>
             </div>
           </div>
 
@@ -1086,7 +2562,7 @@
               <p class="deck-hint" id="deckHintText">Hold your nerve. Listen for the needle scratch.</p>
             </div>
             <button id="chamberSitBtn" onclick="onSitClicked()" disabled>
-              SEIZE SEAT <kbd>SPACE</kbd>
+              SEIZE SEAT <kbd id="chamberSitKey">SPACE</kbd>
             </button>
           </div>
         </div>
@@ -1133,23 +2609,23 @@
   <div class="cert-modal-overlay" id="certModal">
     <div class="cert-container">
       <!-- Certificate Customization Controls Panel -->
-      <div style="background:#f4ebd9;border:2px solid var(--lamp);padding:10px 16px;margin-bottom:12px;border-radius:4px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px;box-shadow:0 6px 20px rgba(0,0,0,0.4);">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <label for="certFloorSelect" style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--ink);">CREDENTIAL LEVEL:</label>
-          <select id="certFloorSelect" style="background:#fffcf5;border:1px solid var(--rule);padding:5px 10px;font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--oxblood);border-radius:3px;outline:none;" onchange="updateCertFloorPreview(this.value)">
+      <div class="cert-controls-panel">
+        <div class="cert-control-item">
+          <label for="certFloorSelect" class="cert-control-label">CREDENTIAL:</label>
+          <select id="certFloorSelect" class="cert-control-select" onchange="updateCertFloorPreview(this.value)">
           </select>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <label for="certNameInput" style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--ink);">RECIPIENT NAME:</label>
-          <input type="text" id="certNameInput" value="YOU" maxlength="32" style="background:#fffcf5;border:1px solid var(--rule);padding:6px 10px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--oxblood);border-radius:3px;outline:none;width:180px;" oninput="updateCertRecipientName(this.value)">
+        <div class="cert-control-item">
+          <label for="certNameInput" class="cert-control-label">RECIPIENT:</label>
+          <input type="text" id="certNameInput" value="YOU" maxlength="32" class="cert-control-input" oninput="updateCertRecipientName(this.value)">
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <label style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--ink);">CUSTOM PORTRAIT (PF):</label>
+        <div class="cert-control-item">
+          <label class="cert-control-label">PORTRAIT:</label>
           <input type="file" id="certPfInput" accept="image/*" style="display:none;" onchange="handleCertPfUpload(event)">
-          <button class="desk-button secondary" style="padding:5px 12px;font-size:11px;" onclick="document.getElementById('certPfInput').click()">
-            Upload Custom Image
+          <button class="desk-button secondary cert-control-btn" onclick="document.getElementById('certPfInput').click()">
+            Upload Photo
           </button>
-          <button class="desk-button secondary" id="resetCertPfBtn" style="padding:5px 10px;font-size:11px;display:none;" onclick="resetCertPortrait()">
+          <button class="desk-button secondary cert-control-btn" id="resetCertPfBtn" style="display:none;" onclick="resetCertPortrait()">
             Reset PF
           </button>
         </div>
@@ -1362,6 +2838,151 @@
     }
 
     // ==========================================================================
+    // PROCEDURAL MINECRAFT VILLAGER VOICE SYNTHESIZER
+    // Formant-filtered nasal hums & grunts ("Hrrrm", "Huh?", "Hmph!", "Hr-hm!")
+    // Uses dual saw/triangle oscillators + twin bandpass vocal formants (420Hz & 1080Hz)
+    // ==========================================================================
+    const VILLAGER_VOICE_TYPES = ['hmm', 'huh', 'hmph', 'deep', 'yes'];
+
+    function playVillagerSound(variation = 'random', pitchMod = 1.0, distance = 0, maxDist = 8.0) {
+      if (!chamberSound) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+
+        let volFactor = 1.0;
+        if (distance > 0 && maxDist > 0) {
+          volFactor = Math.max(0.0, 1.0 - (distance / maxDist));
+        }
+        if (volFactor <= 0.02) return;
+
+        let type = variation;
+        if (type === 'random') {
+          type = VILLAGER_VOICE_TYPES[Math.floor(Math.random() * VILLAGER_VOICE_TYPES.length)];
+        } else if (type === 'affirmative') {
+          type = 'yes';
+        } else if (type === 'grumpy') {
+          type = 'hmph';
+        }
+
+        const now = audioCtx.currentTime;
+        let baseF = 138 * pitchMod;
+        let dur = 0.34;
+
+        if (type === 'deep') {
+          baseF = 104 * pitchMod;
+          dur = 0.44;
+        } else if (type === 'hmph') {
+          baseF = 158 * pitchMod;
+          dur = 0.20;
+        } else if (type === 'yes') {
+          dur = 0.38;
+        }
+
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        osc1.type = 'sawtooth';
+        osc2.type = 'triangle';
+
+        if (type === 'huh') {
+          // Question grunt ("Huh? / Hrr?")
+          osc1.frequency.setValueAtTime(baseF * 0.90, now);
+          osc1.frequency.exponentialRampToValueAtTime(baseF * 1.55, now + dur);
+          osc2.frequency.setValueAtTime(baseF * 0.90, now);
+          osc2.frequency.exponentialRampToValueAtTime(baseF * 1.55, now + dur);
+        } else if (type === 'hmph') {
+          // Sharp dismissive grunt ("Hmph!")
+          osc1.frequency.setValueAtTime(baseF * 1.25, now);
+          osc1.frequency.exponentialRampToValueAtTime(baseF * 0.70, now + dur);
+          osc2.frequency.setValueAtTime(baseF * 1.25, now);
+          osc2.frequency.exponentialRampToValueAtTime(baseF * 0.70, now + dur);
+        } else if (type === 'yes') {
+          // Double grunt ("Hr-hm!")
+          osc1.frequency.setValueAtTime(baseF * 0.95, now);
+          osc1.frequency.linearRampToValueAtTime(baseF * 1.05, now + 0.12);
+          osc1.frequency.setValueAtTime(baseF * 1.30, now + 0.15);
+          osc1.frequency.exponentialRampToValueAtTime(baseF * 0.95, now + dur);
+
+          osc2.frequency.setValueAtTime(baseF * 0.95, now);
+          osc2.frequency.linearRampToValueAtTime(baseF * 1.05, now + 0.12);
+          osc2.frequency.setValueAtTime(baseF * 1.30, now + 0.15);
+          osc2.frequency.exponentialRampToValueAtTime(baseF * 0.95, now + dur);
+        } else {
+          // Classic contemplative villager "Hrrrm"
+          osc1.frequency.setValueAtTime(baseF * 0.92, now);
+          osc1.frequency.linearRampToValueAtTime(baseF * 1.15, now + dur * 0.35);
+          osc1.frequency.exponentialRampToValueAtTime(baseF * 0.88, now + dur);
+
+          osc2.frequency.setValueAtTime(baseF * 0.92, now);
+          osc2.frequency.linearRampToValueAtTime(baseF * 1.15, now + dur * 0.35);
+          osc2.frequency.exponentialRampToValueAtTime(baseF * 0.88, now + dur);
+        }
+
+        // Formant 1: Nasal chest resonance (~420Hz)
+        const bp1 = audioCtx.createBiquadFilter();
+        bp1.type = 'bandpass';
+        bp1.frequency.value = 420;
+        bp1.Q.value = 4.0;
+
+        // Formant 2: Nasal pharyngeal resonance (~1080Hz)
+        const bp2 = audioCtx.createBiquadFilter();
+        bp2.type = 'bandpass';
+        bp2.frequency.value = 1080;
+        bp2.Q.value = 3.5;
+
+        // Lowpass to give warm, muffled cartoon villager quality
+        const lp = audioCtx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = 2100;
+
+        const g1 = audioCtx.createGain();
+        const g2 = audioCtx.createGain();
+        const master = audioCtx.createGain();
+
+        g1.gain.setValueAtTime(0.001, now);
+        g1.gain.linearRampToValueAtTime(0.32, now + 0.035);
+        g1.gain.setValueAtTime(0.32, now + dur * 0.65);
+        g1.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+        g2.gain.setValueAtTime(0.001, now);
+        g2.gain.linearRampToValueAtTime(0.22, now + 0.035);
+        g2.gain.setValueAtTime(0.22, now + dur * 0.65);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+        master.gain.setValueAtTime(0.36 * volFactor, now);
+
+        osc1.connect(bp1); osc2.connect(bp1);
+        osc1.connect(bp2); osc2.connect(bp2);
+
+        bp1.connect(g1);
+        bp2.connect(g2);
+
+        g1.connect(lp);
+        g2.connect(lp);
+
+        lp.connect(master);
+        master.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + dur + 0.05);
+        osc2.stop(now + dur + 0.05);
+
+        osc1.onended = () => {
+          try {
+            osc1.disconnect(); osc2.disconnect();
+            bp1.disconnect(); bp2.disconnect();
+            g1.disconnect(); g2.disconnect();
+            lp.disconnect(); master.disconnect();
+          } catch(e) {}
+        };
+      } catch(e) {}
+    }
+
+    // ==========================================================================
     // 90s VIBE SOOTHING AMBIENT CORPORATE SYNTH (Slow & Warm Lounge / Office)
     // Plays smoothly in normal game; automatically fades out when Musical Chairs starts,
     // and seamlessly fades back in when exiting the arena back to the floor.
@@ -1553,7 +3174,7 @@
       floorMusicEnabled = !floorMusicEnabled;
       const btn = document.getElementById('hudMusicText');
       const icon = document.getElementById('hudMusicIcon');
-      if (btn) btn.innerText = `MUSIC: ${floorMusicEnabled ? 'ON' : 'OFF'}`;
+      if (btn) btn.innerHTML = `<span class="btn-desktop-text">MUSIC: ${floorMusicEnabled ? 'ON' : 'OFF'}</span><span class="btn-mobile-text" style="display:none;">${floorMusicEnabled ? 'BGM' : 'MUTE'}</span>`;
       if (icon) icon.innerText = floorMusicEnabled ? '📻' : '🔇';
 
       if (floorMusicEnabled) {
@@ -1702,6 +3323,41 @@
       return false;
     }
 
+    function resolveCollision(px, pz, radius) {
+      let resX = px;
+      let resZ = pz;
+      // Perform 2 relaxation passes for multi-collider corners
+      for (let pass = 0; pass < 2; pass++) {
+        for (let i = 0; i < colliders.length; i++) {
+          const c = colliders[i];
+          const closestX = Math.max(c.minX, Math.min(resX, c.maxX));
+          const closestZ = Math.max(c.minZ, Math.min(resZ, c.maxZ));
+          const dx = resX - closestX;
+          const dz = resZ - closestZ;
+          const distSq = dx * dx + dz * dz;
+          if (distSq < radius * radius) {
+            const dist = Math.sqrt(distSq);
+            if (dist > 0.0001) {
+              const overlap = radius - dist;
+              resX += (dx / dist) * overlap;
+              resZ += (dz / dist) * overlap;
+            } else {
+              const distMinX = Math.abs(resX - c.minX);
+              const distMaxX = Math.abs(resX - c.maxX);
+              const distMinZ = Math.abs(resZ - c.minZ);
+              const distMaxZ = Math.abs(resZ - c.maxZ);
+              const minDist = Math.min(distMinX, distMaxX, distMinZ, distMaxZ);
+              if (minDist === distMinX) resX = c.minX - radius - 0.02;
+              else if (minDist === distMaxX) resX = c.maxX + radius + 0.02;
+              else if (minDist === distMinZ) resZ = c.minZ - radius - 0.02;
+              else resZ = c.maxZ + radius + 0.02;
+            }
+          }
+        }
+      }
+      return { x: resX, z: resZ };
+    }
+
     // ==========================================================================
     // FLOOR QUESTS & DIRECTIVES (Floors 0 to 9)
     // ==========================================================================
@@ -1838,6 +3494,10 @@
       }
     };
 
+    function isTouchDevice() {
+      return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches));
+    }
+
     // =====================================================================
     // BLOCKING RETRO POKEMON GUIDE (typewriter + movement lock + dismiss)
     // =====================================================================
@@ -1878,7 +3538,10 @@
         _guideTypeTimer = setTimeout(() => _typeGuideChar(textEl, cursor), delay);
       } else {
         _guideTypeTimer = null;
-        if (cursor) { cursor.textContent = 'Press [E] to continue'; cursor.style.opacity = '1'; }
+        if (cursor) {
+          cursor.textContent = 'Tap anywhere to continue';
+          cursor.style.opacity = '1';
+        }
       }
     }
 
@@ -1890,7 +3553,10 @@
         if (_guideTypeTimer) { clearTimeout(_guideTypeTimer); _guideTypeTimer = null; }
         textEl.textContent = _guideFullText;
         _guideCharIdx = _guideFullText.length;
-        if (cursor) { cursor.textContent = 'Press [E] to continue'; cursor.style.opacity = '1'; }
+        if (cursor) {
+          cursor.textContent = 'Tap anywhere to continue';
+          cursor.style.opacity = '1';
+        }
       } else {
         _dismissGuide();
       }
@@ -1913,6 +3579,18 @@
       _dismissFlagTimer = setTimeout(() => { _justDismissedGuide = false; _dismissFlagTimer = null; }, 350);
     }
 
+    function toggleQuestPanelCollapse(e) {
+      if (e) e.stopPropagation();
+      const panel = document.getElementById('activeQuestPanel');
+      const arrow = document.getElementById('questToggleArrow');
+      if (!panel) return;
+      panel.dataset.userToggled = 'true';
+      panel.classList.toggle('collapsed');
+      if (arrow) {
+        arrow.innerText = panel.classList.contains('collapsed') ? '▲' : '▼';
+      }
+    }
+
     function updateActiveQuestUI() {
       const q = FLOOR_QUESTS[currentFloor];
       const panel = document.getElementById('activeQuestPanel');
@@ -1921,6 +3599,13 @@
       const statusPill = document.getElementById('questStatusPill');
 
       if (!q || !panel || !titleEl || !objEl || !statusPill) return;
+
+      // On mobile screens, default quest panel to collapsed if user hasn't toggled it
+      if (window.innerWidth <= 768 && !panel.dataset.userToggled) {
+        panel.classList.add('collapsed');
+        const arrow = document.getElementById('questToggleArrow');
+        if (arrow) arrow.innerText = '▲';
+      }
 
       const isCompleted = (currentFloor === 0 ? flickerr.gateAdmitted : flickerr.chairsWon.includes(q.chairName));
       const isTaskDone = (currentFloor === 0 ? flickerr.gateAdmitted : (flickerr.tasksCompleted && flickerr.tasksCompleted.includes(currentFloor)));
@@ -2399,6 +4084,7 @@
     caseGroup.add(latch2);
 
     let interactiveObjects = [];
+    let officeWorkers = [];
     let roomGroup = new THREE.Group();
     scene.add(roomGroup);
 
@@ -2566,6 +4252,7 @@
         roomGroup.remove(roomGroup.children[0]);
       }
       interactiveObjects = [];
+      officeWorkers = [];
       colliders.length = 0;
 
       if (currentFloor === 0) {
@@ -2579,31 +4266,47 @@
       }
     }
 
+    let _lobbyTransitionCooldown = 0;
+
     function enterGroundLobby() {
       if (floor0Area === 'inside') return;
+      if (_lobbyTransitionCooldown && Date.now() < _lobbyTransitionCooldown) return;
+      _lobbyTransitionCooldown = Date.now() + 600;
+      if (typeof _dismissGuide === 'function') _dismissGuide();
+      if (typeof dismissMemoToast === 'function') dismissMemoToast();
       playDoorLatchSound();
       floor0Area = 'inside';
       buildFloorEnvironment();
-      playerGroup.position.set(0, 0.0, 5.0);
+      playerGroup.position.set(0, 0.0, 4.6);
       playerGroup.rotation.y = Math.PI; // Face North into lobby
       camera.position.set(0, 4.4, 6.8);
       camera.lookAt(0, 1.2, 3.5);
-      showMemoToast("ENTERING HEADQUARTERS", "Entering Ground Admissions Lobby. The grand entrance gate closes behind you.");
-      setRetroGuide("ADMISSIONS LOBBY", "The grand gate closed behind you. Speak with the Security Gatekeeper to receive your department covenant and pass.");
+      if (typeof keys !== 'undefined') {
+        for (const k in keys) keys[k] = false;
+      }
+      touchMoveX = 0;
+      touchMoveZ = 0;
       updateActiveQuestUI();
     }
 
     function exitGroundLobby() {
       if (floor0Area === 'outside') return;
+      if (_lobbyTransitionCooldown && Date.now() < _lobbyTransitionCooldown) return;
+      _lobbyTransitionCooldown = Date.now() + 600;
+      if (typeof _dismissGuide === 'function') _dismissGuide();
+      if (typeof dismissMemoToast === 'function') dismissMemoToast();
       playDoorLatchSound();
       floor0Area = 'outside';
       buildFloorEnvironment();
-      playerGroup.position.set(0, 0.85, 2.2);
+      playerGroup.position.set(0, 0.85, 3.2);
       playerGroup.rotation.y = 0; // Face South down stairs
       camera.position.set(0, 5.2, 8.5);
       camera.lookAt(0, 1.2, 2.2);
-      showMemoToast("EXITING TO STREET", "Returning outside to the entrance stairs.");
-      setRetroGuide("OUTSIDE STAIRS", "You stand on the entrance stairs. Climb up and step into the gate to enter the lobby.");
+      if (typeof keys !== 'undefined') {
+        for (const k in keys) keys[k] = false;
+      }
+      touchMoveX = 0;
+      touchMoveZ = 0;
       updateActiveQuestUI();
     }
 
@@ -2788,9 +4491,9 @@
       // Interactive Portico Portal Trigger
       interactiveObjects.push({
         id: "ground_gate_enter",
-        label: "Grand Portico: Step Inside to Ground Admissions Lobby [E]",
+        label: "Grand Portico: Step Inside to Ground Admissions Lobby",
         pos: new THREE.Vector3(0, 0.8, 1.8),
-        radius: 2.2,
+        radius: 1.8,
         action: enterGroundLobby
       });
 
@@ -2800,7 +4503,10 @@
         playerGroup.rotation.y = Math.PI; // Face North towards stairs & building
       }
 
-      setRetroGuide("OUTSIDE GATE", "You stand on the pavement before The Mutual Fun Headquarters. Climb the granite stairs to enter the ground admissions lobby.");
+      if (!flickerr._introGuideSeen && !flickerr.gateAdmitted) {
+        flickerr._introGuideSeen = true;
+        setRetroGuide("OUTSIDE GATE", "You stand on the pavement before The Mutual Fun Headquarters. Climb the granite stairs to enter the ground admissions lobby.");
+      }
       updateActiveQuestUI();
     }
 
@@ -2902,9 +4608,9 @@
       // Interactive Exit Trigger at Closed South Gate
       interactiveObjects.push({
         id: "ground_gate_exit",
-        label: "Grand Entrance Portico: Exit Outside to Street & Stairs [E]",
+        label: "Grand Entrance Portico: Exit Outside to Street & Stairs",
         pos: new THREE.Vector3(0, 0.0, 6.2),
-        radius: 2.2,
+        radius: 1.8,
         action: exitGroundLobby
       });
 
@@ -2964,7 +4670,6 @@
         roomGroup.add(frameMesh);
       });
 
-      setRetroGuide("ADMISSIONS LOBBY", "The grand gate closed behind you. Speak with the Security Gatekeeper to receive your department covenant and pass.");
       updateActiveQuestUI();
     }
 
@@ -3309,6 +5014,14 @@
       const chair = createChair(0, 0, 0, floorTier, 0);
       holderGroup.add(chair);
 
+      // Person Group (contains head, torso, limbs for animated villager nods & greetings)
+      const personGroup = new THREE.Group();
+      holderGroup.add(personGroup);
+
+      // Temporarily route body additions to personGroup so entire character nods seamlessly
+      const _origAdd = holderGroup.add;
+      holderGroup.add = function(...args) { personGroup.add(...args); return holderGroup; };
+
       // Distinct character visual attributes mapped to gallery plates
       const suitColor = roleData.color || 0x223654;
       const suitMat = new THREE.MeshLambertMaterial({ color: suitColor });
@@ -3572,6 +5285,9 @@
       armR.position.set(0.44, 1.05, 0.05);
       holderGroup.add(armR);
 
+      // Restore holderGroup.add for furniture/accessories that should remain stationary
+      holderGroup.add = _origAdd;
+
       // Briefcase placed beside desk (matching Gallery Plates!)
       const caseMat = new THREE.MeshLambertMaterial({ color: roleData.caseColor || 0x4a2c16 });
       const bCase = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.52, 0.68), caseMat);
@@ -3624,6 +5340,35 @@
           })
         });
       }
+
+      // Voice profile per role / tier for Minecraft villager sounds
+      let voiceType = roleData.voiceType || 'hmm';
+      let pitchMod = roleData.pitchMod || 1.0;
+      if (!roleData.voiceType) {
+        if (floorTier === 0) { voiceType = 'huh'; pitchMod = 1.05; }
+        else if (floorTier === 1) { voiceType = 'yes'; pitchMod = 1.18; }
+        else if (floorTier === 2) { voiceType = 'hmm'; pitchMod = 0.98; }
+        else if (floorTier === 3) { voiceType = 'huh'; pitchMod = 1.12; }
+        else if (floorTier === 4) { voiceType = 'hmph'; pitchMod = 0.95; }
+        else if (floorTier === 5) { voiceType = 'hmph'; pitchMod = 0.90; }
+        else if (floorTier === 6) { voiceType = 'hmph'; pitchMod = 1.22; }
+        else if (floorTier === 7) { voiceType = 'hmm'; pitchMod = 0.85; }
+        else if (floorTier === 8) { voiceType = 'deep'; pitchMod = 0.82; }
+        else if (floorTier === 9) { voiceType = 'deep'; pitchMod = 0.70; }
+      }
+
+      officeWorkers.push({
+        id: roleData.holder,
+        holderGroup,
+        personGroup,
+        pos: new THREE.Vector3(x, y, z),
+        triggerPos: new THREE.Vector3(x, y, z + (roleData.noDesk ? 0 : 2.8)),
+        floorTier,
+        voiceType,
+        pitchMod,
+        nodTimer: 0,
+        lastSpoke: 0
+      });
     }
 
     function openRoleHolderQuestModal(floorTier, roleData) {
@@ -3631,6 +5376,15 @@
       if (!q) return;
 
       playClick();
+      const worker = officeWorkers.find(w => w.floorTier === floorTier || w.id === roleData.holder);
+      if (worker) {
+        playVillagerSound(worker.voiceType || 'yes', (worker.pitchMod || 1.0) * 1.04, 0, 8.0);
+        worker.nodTimer = 0.6;
+        worker.lastSpoke = performance.now();
+      } else {
+        playVillagerSound('yes', 1.1, 0, 8.0);
+      }
+
       modalTitle.innerText = roleData.holder.toUpperCase();
       modalSubtitle.innerText = `${roleData.roleTitle.toUpperCase()} · FLOOR ${floorTier}`;
 
@@ -3666,11 +5420,17 @@
         `;
       }
 
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function completeFloorTask(floorTier) {
       playStampThump();
+      const worker = officeWorkers.find(w => w.floorTier === floorTier);
+      if (worker) {
+        playVillagerSound('affirmative', (worker.pitchMod || 1.0) * 1.08, 0, 8.0);
+        worker.nodTimer = 0.8;
+        worker.lastSpoke = performance.now();
+      }
       if (!flickerr.tasksCompleted) flickerr.tasksCompleted = [];
       if (!flickerr.tasksCompleted.includes(floorTier)) {
         flickerr.tasksCompleted.push(floorTier);
@@ -3681,7 +5441,8 @@
 
       const q = FLOOR_QUESTS[floorTier];
       showMemoToast("TASK VERIFIED", `${q.actionLabel} completed. You are authorized to dispute ${q.chairName}.`);
-      setRetroGuide("TASK COMPLETED", `Duties verified! Challenge ${q.holder} to dispute ${q.chairName} in the Chair Arbitrage Chamber.`);
+      if (typeof _dismissGuide === 'function') _dismissGuide();
+      guideLocked = false;
       
       openRoleHolderQuestModal(floorTier, {
         holder: q.holder,
@@ -4214,9 +5975,96 @@
     const modalSubtitle = document.getElementById('modalSubtitle');
     const modalBody = document.getElementById('modalBody');
 
+    function updateActiveModalState() {
+      const mEl = document.getElementById('taskModal');
+      const eEl = document.getElementById('elevatorModal');
+      const aEl = document.getElementById('arenaModal');
+      const cEl = document.getElementById('certModal');
+
+      const isTask = !!(mEl && mEl.classList.contains('active'));
+      const isElev = !!(eEl && eEl.classList.contains('active'));
+      const isArena = !!(aEl && aEl.classList.contains('active'));
+      const isCert = !!(cEl && cEl.classList.contains('active'));
+      const isAnyModal = isTask || isElev || isArena || isCert;
+
+      document.body.classList.toggle('in-modal', isAnyModal);
+      document.body.classList.toggle('in-arena', isArena);
+
+      const mobileControls = document.getElementById('mobileControls');
+      const joystickZone = document.getElementById('joystickZone');
+      if (mobileControls) {
+        if (isAnyModal) {
+          mobileControls.style.setProperty('display', 'none', 'important');
+          mobileControls.style.setProperty('pointer-events', 'none', 'important');
+        } else {
+          mobileControls.style.removeProperty('display');
+          mobileControls.style.removeProperty('pointer-events');
+        }
+      }
+      if (joystickZone) {
+        if (isAnyModal) {
+          joystickZone.style.setProperty('display', 'none', 'important');
+          joystickZone.style.setProperty('pointer-events', 'none', 'important');
+        } else {
+          joystickZone.style.removeProperty('display');
+          joystickZone.style.removeProperty('pointer-events');
+        }
+      }
+      const questPanel = document.getElementById('activeQuestPanel');
+      if (questPanel) {
+        if (isAnyModal) {
+          questPanel.style.setProperty('display', 'none', 'important');
+          questPanel.style.setProperty('pointer-events', 'none', 'important');
+        } else {
+          questPanel.style.removeProperty('display');
+          questPanel.style.removeProperty('pointer-events');
+        }
+      }
+      const topHud = document.getElementById('gameTopHud');
+      if (topHud) {
+        if (isAnyModal) {
+          topHud.style.setProperty('display', 'none', 'important');
+          topHud.style.setProperty('pointer-events', 'none', 'important');
+        } else {
+          topHud.style.removeProperty('display');
+          topHud.style.removeProperty('pointer-events');
+        }
+      }
+      const interactPrompt = document.getElementById('interactPrompt');
+      if (interactPrompt) {
+        if (isAnyModal) {
+          interactPrompt.style.setProperty('display', 'none', 'important');
+          interactPrompt.style.setProperty('pointer-events', 'none', 'important');
+        } else {
+          interactPrompt.style.removeProperty('display');
+          interactPrompt.style.removeProperty('pointer-events');
+        }
+      }
+    }
+
+    try {
+      const _modalObserver = new MutationObserver(() => {
+        updateActiveModalState();
+      });
+      ['taskModal', 'elevatorModal', 'arenaModal', 'certModal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          _modalObserver.observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
+        }
+      });
+    } catch (e) {
+      console.warn("Modal observer init:", e);
+    }
+
+    function openTaskModal() {
+      modalEl.classList.add('active');
+      updateActiveModalState();
+    }
+
     function closeTaskModal() {
       playClick();
       modalEl.classList.remove('active');
+      updateActiveModalState();
     }
 
     let _toastTimer = null;
@@ -4251,45 +6099,52 @@
 
     function openElevatorModal() {
       playElevatorDing();
+      elevList.scrollTop = 0;
       elevList.innerHTML = "";
 
       for (let i = 0; i <= 9; i++) {
         const r = ROLES[i];
         const isCurrent = (i === currentFloor);
         const isUnlocked = (i <= unlockedFloor || flickerr.reviewScore >= r.minPts);
+        const floorLabel = (i === 0 ? 'LEVEL 0' : (i === 9 ? 'PENTHOUSE' : 'FLOOR ' + i));
 
-        const row = document.createElement('div');
-        row.style.display = "flex";
-        row.style.justifyContent = "space-between";
-        row.style.alignItems = "center";
-        row.style.padding = "10px 14px";
-        row.style.background = isCurrent ? "#dfcfb0" : (isUnlocked ? "#f0e6d2" : "#ddceb8");
-        row.style.border = isCurrent ? "2px solid var(--oxblood)" : "1px solid var(--rule)";
-        row.style.opacity = isUnlocked ? "1" : "0.55";
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = `elevator-floor-card ${isCurrent ? 'is-current' : (isUnlocked ? 'is-unlocked' : 'is-locked')}`;
 
-        row.innerHTML = `
-          <div>
-            <strong style="font-family:'Cinzel';font-size:13px;color:${isCurrent ? 'var(--oxblood)' : 'var(--ink)'};">
-              ${i === 0 ? 'LEVEL 0' : (i === 9 ? 'PENTHOUSE' : 'FLOOR ' + i)} · ${r.title.toUpperCase()}
-            </strong>
-            <div style="font-family:'IBM Plex Mono';font-size:10px;color:var(--ink-muted);">
-              Chair: ${r.chair} | Required: ${r.minPts} Review Pts
-            </div>
+        if (isCurrent) {
+          card.onclick = () => {
+            showMemoToast("ELEVATOR CONCOURSE", `Already stationed at ${floorLabel}.`);
+          };
+        } else if (isUnlocked) {
+          card.onclick = () => rideElevatorTo(i);
+        } else {
+          card.onclick = () => {
+            showMemoToast("CLEARANCE DENIED", `Requires ${r.minPts} Review Points for floor authorization.`);
+          };
+        }
+
+        card.innerHTML = `
+          <div class="elevator-card-left">
+            <span class="elevator-card-title">${floorLabel} · ${r.title.toUpperCase()}</span>
+            <span class="elevator-card-sub">Chair: ${r.chair} | Req: ${r.minPts} Pts</span>
           </div>
-          <div>
-            ${isCurrent ? '<span style="font-family:\'IBM Plex Mono\';font-size:11px;font-weight:700;color:var(--oxblood);">[HERE]</span>' :
-              (isUnlocked ? `<button class="desk-button" onclick="rideElevatorTo(${i})" style="padding:6px 12px;font-size:11px;">RIDE CAR</button>` :
-                `<span style="font-family:'IBM Plex Mono';font-size:11px;color:#8a4040;">LOCKED (${r.minPts} pts)</span>`)}
+          <div class="elevator-card-right">
+            ${isCurrent ? '<span class="elevator-badge-here">[HERE]</span>' :
+              (isUnlocked ? '<span class="elevator-arrow-indicator">➔</span>' :
+                `<span class="elevator-badge-locked">LOCKED (${r.minPts} pts)</span>`)}
           </div>
         `;
-        elevList.appendChild(row);
+        elevList.appendChild(card);
       }
       elevModal.classList.add('active');
+      updateActiveModalState();
     }
 
     function closeElevatorModal() {
       playClick();
       elevModal.classList.remove('active');
+      updateActiveModalState();
     }
 
     function rideElevatorTo(targetFloor) {
@@ -4299,11 +6154,19 @@
       buildFloorEnvironment();
       updateHUD();
       saveGame();
-      showMemoToast("CAR DISPATCHED", `Arrived at ${getFloorName(currentFloor)}.`);
     }
 
     function openGatekeeperModal() {
       playClick();
+      const worker = officeWorkers.find(w => w.floorTier === 0 || w.id === "Security Gatekeeper");
+      if (worker) {
+        playVillagerSound(worker.voiceType || 'huh', (worker.pitchMod || 1.05) * 1.02, 0, 8.0);
+        worker.nodTimer = 0.6;
+        worker.lastSpoke = performance.now();
+      } else {
+        playVillagerSound('huh', 1.05, 0, 8.0);
+      }
+
       modalTitle.innerText = "SECURITY GATEKEEPER";
       modalSubtitle.innerText = "ADMISSIONS DESK · WEST GATE";
 
@@ -4325,11 +6188,19 @@
           </div>
         </div>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function enrollAtGate(deptName, deptIdx) {
       playStampThump();
+      const worker = officeWorkers.find(w => w.floorTier === 0 || w.id === "Security Gatekeeper");
+      if (worker) {
+        playVillagerSound('yes', (worker.pitchMod || 1.05) * 1.1, 0, 8.0);
+        worker.nodTimer = 0.8;
+        worker.lastSpoke = performance.now();
+      } else {
+        playVillagerSound('yes', 1.15, 0, 8.0);
+      }
       flickerr.department = deptName;
       flickerr.deptIndex = deptIdx;
       flickerr.gateAdmitted = true;
@@ -4361,7 +6232,7 @@
           `).join('')}
         </div>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function routeMailChute(fund) {
@@ -4398,7 +6269,7 @@
           Certify Column Balances (+14 Review Pts)
         </button>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function auditLedgerAction() {
@@ -4429,7 +6300,7 @@
           </button>
         </div>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function tenderDengSlip(cr) {
@@ -4461,7 +6332,7 @@
           Reconcile Share Allotments (+20 Review Pts)
         </button>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function auditSubscriptionsAction() {
@@ -4483,7 +6354,7 @@
           Sign Off Compliance Clearance (+30 Review Pts)
         </button>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function signDossierAction() {
@@ -4515,7 +6386,7 @@
           Challenge what3verman in The Chair Chamber (Floor 6)
         </button>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function openPartnerSyndicateModal() {
@@ -4528,7 +6399,7 @@
           Underwrite Quarterly Distribution (+45 Review Pts)
         </button>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function underwriteSyndicateAction() {
@@ -4550,7 +6421,7 @@
           Receive Boardroom Clearance (+60 Review Pts)
         </button>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     function conferBoardAction() {
@@ -4582,7 +6453,7 @@
           The Final Dispute: Challenge Kingpickle for The Gilded Throne
         </button>
       `;
-      modalEl.classList.add('active');
+      openTaskModal();
     }
 
     // ==========================================================================
@@ -4664,25 +6535,33 @@
 
       const previewDiv = document.getElementById('introContendersPreview');
       previewDiv.innerHTML = arenaContenders.slice(0, 2).map((c, idx) => `
-        <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;margin:0 12px;">
-          <img class="chamber-thumb" style="width:58px;height:58px;border:3px solid ${c.color};border-radius:4px;" src="${c.avatar}" alt="${c.name}">
-          <span style="font-size:11px;font-weight:700;color:#211b14;font-family:Cinzel,serif;">${c.name}</span>
-          <small style="font-size:9px;color:#7a6d5d;font-family:'IBM Plex Mono',monospace;">${idx === 0 ? 'YOU' : 'RIVAL'}</small>
+        <div class="contender-preview-card">
+          <img class="contender-preview-thumb" style="border: 2px solid ${c.color};" src="${c.avatar}" alt="${c.name}">
+          <span class="contender-preview-name">${c.name}</span>
+          <small class="contender-preview-role">${idx === 0 ? 'YOU' : 'RIVAL'}</small>
         </div>
-      `).join('<div style="display:inline-block;font-size:20px;font-weight:900;color:#7a2e2e;font-family:Cinzel,serif;vertical-align:middle;margin:0 6px;">VS</div>');
+      `).join('<div class="contender-vs-badge">VS</div>');
 
       arenaIntroOverlay.classList.remove('hidden');
       arenaResultOverlay.classList.add('hidden');
 
       renderRoster();
       setArenaSignal('waiting', 'PHONOGRAPH READY');
-      setDeckHint("Read house protocol. Press ENTER CHAMBER or [SPACE] to begin.");
+      const isTouch = (typeof isTouchDevice === 'function' && isTouchDevice());
+      setDeckHint(isTouch ? "Read house protocol. Tap ENTER CHAMBER to begin." : "Read house protocol. Press ENTER CHAMBER or [SPACE] to begin.");
       chamberSitBtn.disabled = true;
+      const introKey = document.getElementById('introKeyHint');
+      if (introKey) introKey.innerText = isTouch ? '[TAP]' : '[SPACE]';
+      const sitKey = document.getElementById('chamberSitKey');
+      if (sitKey) sitKey.innerText = isTouch ? 'TAP' : 'SPACE';
 
       // Immediately pause ambient floor BGM so musical chairs arena takes precedence
       stopFloorBGM(0.4);
 
-      arenaModal.classList.add('active'); if (promptEl) promptEl.style.display = 'none';
+      arenaModal.classList.add('active');
+      document.body.classList.add('in-arena');
+      if (promptEl) promptEl.style.display = 'none';
+      updateActiveModalState();
 
       if (!arenaAnimFrame) {
         lastFrameTime = performance.now();
@@ -4844,7 +6723,8 @@
       })).sort((a, b) => a.at - b.at);
 
       setArenaSignal('red', 'NEEDLE CUT: SIT NOW');
-      setDeckHint("Press SPACE or tap SEIZE SEAT to secure a chair.");
+      const isTouch = (typeof isTouchDevice === 'function' && isTouchDevice());
+      setDeckHint(isTouch ? "TAP SCREEN OR SEIZE SEAT NOW!" : "Press SPACE or tap SEIZE SEAT to secure a chair.");
       
       // Play authentic vinyl scratch + boardroom bell chime
       playNeedleScratchAndBell();
@@ -4889,6 +6769,16 @@
         chamberSitBtn.classList.remove('slam-ready');
       }
       return true;
+    }
+
+    function onArenaSceneTap(e) {
+      if (arenaPhase === 'green' || arenaPhase === 'red') {
+        if (e) {
+          if (typeof e.preventDefault === 'function') e.preventDefault();
+          if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        }
+        onSitClicked();
+      }
     }
 
     function onSitClicked() {
@@ -4938,6 +6828,8 @@
       const title = document.getElementById('resultTitle');
       const body = document.getElementById('resultBody');
       const btn = document.getElementById('resultBtn');
+      const isTouch = (typeof isTouchDevice === 'function' && isTouchDevice());
+      const spTag = isTouch ? '<span id="resultKeyHint">[TAP]</span>' : '<span id="resultKeyHint">[SPACE]</span>';
 
       if (playerLost) {
         kicker.innerText = "CHAIR FORFEITURE";
@@ -4945,14 +6837,14 @@
         body.innerText = arenaEarly ?
           "You moved before the needle scratched. Wait for the bell and oxblood signal before making your move." :
           `Your rivals seized all remaining seats. (Your reaction: ${arenaLastReaction || '-'} ms). Train your reflexes and challenge again.`;
-        btn.innerHTML = "TRY AGAIN [SPACE]";
+        btn.innerHTML = `TRY AGAIN ${spTag}`;
         setArenaSignal('red', 'FORFEITED');
         tone(140, 0.4, 'sawtooth', 0.08);
       } else if (playerWon) {
         kicker.innerText = "CHAMPIONSHIP VICTORY";
         title.innerText = "THE LAST CHAIR IS YOURS";
         body.innerText = `You out-reflexed ${arenaContenders[1] ? arenaContenders[1].name : 'the Floor Holder'} and secured lawful title to ${arenaChairName} on Floor ${arenaFloor}.`;
-        btn.innerHTML = "CLAIM CERTIFICATE & ADVANCE [SPACE]";
+        btn.innerHTML = `CLAIM CERTIFICATE & ADVANCE ${spTag}`;
         setArenaSignal('green', 'TITLE SECURED');
 
         // Victory fanfare
@@ -4974,7 +6866,7 @@
         kicker.innerText = "ROUND COMPLETE";
         title.innerText = "SEAT SECURED";
         body.innerText = `${eliminatedName} is out. Next up: ${arenaActive.length} contenders, ${arenaActive.length - 1} chairs.`;
-        btn.innerHTML = "NEXT ROUND [SPACE]";
+        btn.innerHTML = `NEXT ROUND ${spTag}`;
         setArenaSignal('green', 'ROUND CLEARED');
       }
 
@@ -5009,8 +6901,10 @@
       const pEl = document.getElementById('interactPrompt') || (typeof promptEl !== 'undefined' ? promptEl : null);
       if (pEl) pEl.style.display = 'block';
       arenaModal.classList.remove('active');
+      document.body.classList.remove('in-arena');
       arenaPhase = 'idle';
       startFloorBGM();
+      updateActiveModalState();
     }
 
     // ==========================================================================
@@ -6045,8 +7939,8 @@
       const code = e.code.toLowerCase();
       keys[code] = true;
 
-      // Guide advance: only Press [E] to continue
-      if (typeof guideLocked !== 'undefined' && guideLocked && e.code === 'KeyE') {
+      // Guide advance: allow KeyE, Space, or Enter
+      if (typeof guideLocked !== 'undefined' && guideLocked && (e.code === 'KeyE' || e.code === 'Space' || e.code === 'Enter')) {
         e.preventDefault();
         if (typeof advanceGuide === 'function') advanceGuide();
         return;
@@ -6069,7 +7963,7 @@
         return;
       }
 
-      if (e.code === 'KeyE') {
+      if (e.code === 'KeyE' || e.code === 'Space' || e.code === 'Enter') {
         checkInteractions();
       }
       if (e.code === 'Escape') {
@@ -6100,6 +7994,131 @@
     }
 
     // ==========================================================================
+    // MOBILE TOUCH CONTROLS (VIRTUAL JOYSTICK & STAMP ACTION BUTTON)
+    // ==========================================================================
+    let touchMoveX = 0;
+    let touchMoveZ = 0;
+
+    function initTouchControls() {
+      const joystickZone = document.getElementById('joystickZone');
+      const joystickKnob = document.getElementById('joystickKnob');
+      const promptEl = document.getElementById('interactPrompt');
+
+      if (!joystickZone || !joystickKnob) return;
+
+      let activePointerId = null;
+      let center = { x: 0, y: 0 };
+      const maxRadius = 38;
+
+      function onPointerDown(e) {
+        if (activePointerId !== null) return;
+        activePointerId = e.pointerId;
+        if (joystickZone.setPointerCapture) {
+          try { joystickZone.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        const rect = joystickZone.getBoundingClientRect();
+        center = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+        handlePointerMove(e);
+      }
+
+      function handlePointerMove(e) {
+        if (e.pointerId !== activePointerId) return;
+        const dx = e.clientX - center.x;
+        const dy = e.clientY - center.y;
+        const dist = Math.hypot(dx, dy);
+
+        let clampedX = dx;
+        let clampedY = dy;
+        if (dist > maxRadius) {
+          clampedX = (dx / dist) * maxRadius;
+          clampedY = (dy / dist) * maxRadius;
+        }
+
+        joystickKnob.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
+
+        const normX = clampedX / maxRadius;
+        const normY = clampedY / maxRadius;
+
+        if (dist / maxRadius > 0.15) {
+          touchMoveX = normX;
+          touchMoveZ = normY;
+        } else {
+          touchMoveX = 0;
+          touchMoveZ = 0;
+        }
+      }
+
+      function onPointerUp(e) {
+        if (e.pointerId !== activePointerId) return;
+        if (joystickZone.releasePointerCapture) {
+          try { joystickZone.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+        activePointerId = null;
+        touchMoveX = 0;
+        touchMoveZ = 0;
+        joystickKnob.style.transform = 'translate(0px, 0px)';
+      }
+
+      joystickZone.addEventListener('pointerdown', onPointerDown);
+      joystickZone.addEventListener('pointermove', handlePointerMove);
+      joystickZone.addEventListener('pointerup', onPointerUp);
+      joystickZone.addEventListener('pointercancel', onPointerUp);
+
+      // Tap on floating proximity prompt
+      if (promptEl) {
+        promptEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          checkInteractions();
+        });
+        promptEl.addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+        });
+      }
+
+      // Tap on screen to advance retro guide if guide is locked
+      window.addEventListener('pointerdown', (e) => {
+        if (typeof guideLocked !== 'undefined' && guideLocked) {
+          const box = document.getElementById('retroGuideBox');
+          if (box && !box.contains(e.target)) {
+            advanceGuide();
+          }
+        }
+      });
+
+      // Collapse quest tracker on mobile screens by default
+      const questPanel = document.getElementById('activeQuestPanel');
+      if (questPanel && window.innerWidth <= 768) {
+        questPanel.classList.add('collapsed');
+      }
+    }
+
+    function triggerMobileAction() {
+      // 1. If guide is active
+      if (typeof guideLocked !== 'undefined' && guideLocked) {
+        if (typeof advanceGuide === 'function') advanceGuide();
+        return;
+      }
+
+      // 2. If musical chairs arena active
+      if (arenaModal.classList.contains('active')) {
+        if (!arenaIntroOverlay.classList.contains('hidden')) {
+          startArenaMatch();
+        } else if (!arenaResultOverlay.classList.contains('hidden')) {
+          onResultBtnClick();
+        } else if (arenaPhase === 'green' || arenaPhase === 'red') {
+          onSitClicked();
+        }
+        return;
+      }
+
+      // 3. Proximity interactions
+      checkInteractions();
+    }
+
+    // ==========================================================================
     // 3D ANIMATION LOOP (Third-person follow camera, walking bobbing)
     // ==========================================================================
     let walkClock = 0;
@@ -6110,8 +8129,8 @@
       requestAnimationFrame(animate);
 
       // NO CAMERA ROTATION (Fixed classic high-angle follow perspective)
-      let moveX = 0;
-      let moveZ = 0;
+      let moveX = touchMoveX;
+      let moveZ = touchMoveZ;
       if (keys['keyw'] || keys['arrowup']) moveZ -= 1;
       if (keys['keys'] || keys['arrowdown']) moveZ += 1;
       if (keys['keya'] || keys['arrowleft']) moveX -= 1;
@@ -6121,7 +8140,12 @@
       const isModalActive = modalEl.classList.contains('active') || elevModal.classList.contains('active') ||
                             arenaModal.classList.contains('active') || certModal.classList.contains('active');
 
-      if (isMoving && !isModalActive && !(typeof guideLocked !== 'undefined' && guideLocked)) {
+      // If moving and guide is open, smoothly advance / dismiss guide so player never gets stuck
+      if (isMoving && typeof guideLocked !== 'undefined' && guideLocked) {
+        advanceGuide();
+      }
+
+      if (isMoving && !isModalActive) {
         const moveVec = new THREE.Vector3(moveX, 0, moveZ).normalize();
         const speed = 0.12;
         const playerRadius = 0.38;
@@ -6130,19 +8154,16 @@
         const dz = moveVec.z * speed;
 
         if (currentFloor === 0 && floor0Area === 'outside') {
-          // SOLID COLLISION DETECTION OUTSIDE
-          const nextX = playerGroup.position.x + dx;
+          // SOLID COLLISION DETECTION OUTSIDE WITH SMOOTH WALL SLIDING
           const boundX = 14.0;
-          if (Math.abs(nextX) <= boundX && !checkCollision(nextX, playerGroup.position.z, playerRadius)) {
-            playerGroup.position.x = nextX;
-          }
-
-          const nextZ = playerGroup.position.z + dz;
           const minZ = 1.3;
           const maxZ = 13.5;
-          if (nextZ >= minZ && nextZ <= maxZ && !checkCollision(playerGroup.position.x, nextZ, playerRadius)) {
-            playerGroup.position.z = nextZ;
-          }
+          let targetX = Math.max(-boundX, Math.min(boundX, playerGroup.position.x + dx));
+          let targetZ = Math.max(minZ, Math.min(maxZ, playerGroup.position.z + dz));
+
+          const resolved = resolveCollision(targetX, targetZ, playerRadius);
+          playerGroup.position.x = Math.max(-boundX, Math.min(boundX, resolved.x));
+          playerGroup.position.z = Math.max(minZ, Math.min(maxZ, resolved.z));
 
           // Height adjustment for outside stairs
           if (playerGroup.position.z > 5.2) {
@@ -6154,41 +8175,41 @@
             playerGroup.position.y = 1.05; // Portico landing
           }
 
-          // Step through gate auto-trigger: MC enters inside when walking up to the gate
-          if (playerGroup.position.z <= 1.45) {
+          // Step through gate auto-trigger: MC enters inside when walking up to the center gate
+          if (playerGroup.position.z <= 1.48 && Math.abs(playerGroup.position.x) <= 3.2) {
             enterGroundLobby();
             return;
           }
         } else if (currentFloor === 0 && floor0Area === 'inside') {
-          // INSIDE GROUND LOBBY: MC is on flat wood ply floor
+          // INSIDE GROUND LOBBY: MC is on flat wood ply floor with smooth wall sliding
           playerGroup.position.y = 0.0;
-          const nextX = playerGroup.position.x + dx;
           const boundX = 10.5;
-          if (Math.abs(nextX) <= boundX && !checkCollision(nextX, playerGroup.position.z, playerRadius)) {
-            playerGroup.position.x = nextX;
-          }
-
-          const nextZ = playerGroup.position.z + dz;
           const minZ = -10.8;
           const maxZ = 6.4;
-          if (nextZ >= minZ && nextZ <= maxZ && !checkCollision(playerGroup.position.x, nextZ, playerRadius)) {
-            playerGroup.position.z = nextZ;
+          let targetX = Math.max(-boundX, Math.min(boundX, playerGroup.position.x + dx));
+          let targetZ = Math.max(minZ, Math.min(maxZ, playerGroup.position.z + dz));
+
+          const resolved = resolveCollision(targetX, targetZ, playerRadius);
+          playerGroup.position.x = Math.max(-boundX, Math.min(boundX, resolved.x));
+          playerGroup.position.z = Math.max(minZ, Math.min(maxZ, resolved.z));
+
+          // Step through closed entrance door to exit outside if walking into it
+          if (playerGroup.position.z >= 6.35 && Math.abs(playerGroup.position.x) <= 2.4 && dz > 0) {
+            exitGroundLobby();
+            return;
           }
         } else {
-          // Interior office floors (1 to 9)
+          // Interior office floors (1 to 9) with smooth obstacle/desk sliding
           playerGroup.position.y = 0.0;
-          const nextX = playerGroup.position.x + dx;
           const boundX = 10.5;
-          if (Math.abs(nextX) <= boundX && !checkCollision(nextX, playerGroup.position.z, playerRadius)) {
-            playerGroup.position.x = nextX;
-          }
-
-          const nextZ = playerGroup.position.z + dz;
           const minZ = -8.5;
           const maxZ = 7.8;
-          if (nextZ >= minZ && nextZ <= maxZ && !checkCollision(playerGroup.position.x, nextZ, playerRadius)) {
-            playerGroup.position.z = nextZ;
-          }
+          let targetX = Math.max(-boundX, Math.min(boundX, playerGroup.position.x + dx));
+          let targetZ = Math.max(minZ, Math.min(maxZ, playerGroup.position.z + dz));
+
+          const resolved = resolveCollision(targetX, targetZ, playerRadius);
+          playerGroup.position.x = Math.max(-boundX, Math.min(boundX, resolved.x));
+          playerGroup.position.z = Math.max(minZ, Math.min(maxZ, resolved.z));
         }
 
         // Player rotates to face motion direction
@@ -6252,6 +8273,7 @@
       }
 
       let nearby = false;
+      let nearbyObj = null;
       const anyModalActive = modalEl.classList.contains('active') || elevModal.classList.contains('active') ||
                              arenaModal.classList.contains('active') || certModal.classList.contains('active') ||
                              (typeof guideLocked !== 'undefined' && guideLocked);
@@ -6260,7 +8282,14 @@
         for (const obj of interactiveObjects) {
           const dist = playerGroup.position.distanceTo(obj.pos);
           if (dist <= obj.radius) {
-            promptEl.innerText = `[E] ${obj.label}`;
+            nearbyObj = obj;
+            const isTouch = (typeof isTouchDevice === 'function' && isTouchDevice());
+            const prefix = isTouch ? '[TAP]' : '[E]';
+            let displayLabel = obj.label || '';
+            if (isTouch && displayLabel.length > 24 && displayLabel.includes(':')) {
+              displayLabel = displayLabel.split(':')[0].trim();
+            }
+            promptEl.innerText = `${prefix} ${displayLabel}`;
             promptEl.style.display = 'block';
             nearby = true;
             break;
@@ -6269,6 +8298,40 @@
       }
       if (!nearby || anyModalActive) {
         promptEl.style.display = 'none';
+      }
+
+      // ----------------------------------------------------------------------
+      // OFFICE WORKERS: Minecraft Villager Vocalizations & Subtle Nodding Loop
+      // ----------------------------------------------------------------------
+      if (typeof officeWorkers !== 'undefined' && officeWorkers.length > 0) {
+        const nowMs = performance.now();
+        const deltaSec = 0.016;
+        for (let i = 0; i < officeWorkers.length; i++) {
+          const worker = officeWorkers[i];
+          if (!worker || !worker.personGroup) continue;
+
+          // Spatial proximity check (speak when player enters conversational perimeter)
+          const checkPos = worker.triggerPos || worker.pos;
+          if (checkPos && playerGroup) {
+            const dist = playerGroup.position.distanceTo(checkPos);
+            if (dist < 3.2 && (!worker.lastSpoke || (nowMs - worker.lastSpoke > 4500)) && !anyModalActive) {
+              playVillagerSound(worker.voiceType || 'hmm', worker.pitchMod || 1.0, dist, 8.0);
+              worker.nodTimer = 0.55;
+              worker.lastSpoke = nowMs;
+            }
+          }
+
+          // Subtle head/torso nod animation
+          if (worker.nodTimer > 0) {
+            worker.nodTimer -= deltaSec;
+            const progress = Math.max(0, worker.nodTimer);
+            const nodAngle = Math.sin((0.55 - progress) * Math.PI * 4.0) * 0.12;
+            worker.personGroup.rotation.x = Math.max(0, nodAngle);
+            if (worker.nodTimer <= 0) {
+              worker.personGroup.rotation.x = 0;
+            }
+          }
+        }
       }
 
       renderer.render(scene, camera);
@@ -6281,6 +8344,7 @@
     const certCanvas = document.getElementById('certCanvas');
     let certCustomName = "YOU";
     let certCustomAvatarImg = null;
+    let defaultCertAvatarImg = null;
     let certPreviewFloor = 0;
 
     const CERT_FLOOR_SIGNATORIES = {
@@ -6373,12 +8437,14 @@
 
       renderEngravedCertificate();
       certModal.classList.add('active');
+      updateActiveModalState();
     }
 
     function closeCertModal() {
       playClick();
       certModal.classList.remove('active');
       startFloorBGM();
+      updateActiveModalState();
     }
 
     function renderEngravedCertificate() {
@@ -6472,14 +8538,27 @@
       g.fill();
       g.clip();
 
-      const memberImg = certCustomAvatarImg || new Image();
-      if (!certCustomAvatarImg) {
-        memberImg.src = ASSETS.flickerr_human || ASSETS.p_bogle_3;
+      if (!defaultCertAvatarImg) {
+        defaultCertAvatarImg = new Image();
+        defaultCertAvatarImg.onload = () => {
+          if (!certCustomAvatarImg && certModal && certModal.classList.contains('active')) {
+            renderEngravedCertificate();
+          }
+        };
+        defaultCertAvatarImg.src = ASSETS.flickerr_human || ASSETS.p_bogle_3;
       }
-      if (memberImg.complete && memberImg.naturalWidth) {
+      const memberImg = certCustomAvatarImg || defaultCertAvatarImg;
+      if (memberImg && memberImg.complete && memberImg.naturalWidth) {
         const s = Math.max((rx * 2) / memberImg.naturalWidth, (ry * 2) / memberImg.naturalHeight);
         g.drawImage(memberImg, ox - (memberImg.naturalWidth * s) / 2, oy - (memberImg.naturalHeight * s) / 2, memberImg.naturalWidth * s, memberImg.naturalHeight * s);
       } else {
+        if (memberImg && !memberImg.onload) {
+          memberImg.onload = () => {
+            if (certModal && certModal.classList.contains('active')) {
+              renderEngravedCertificate();
+            }
+          };
+        }
         g.fillStyle = MUTED;
         g.font = "700 80px " + CAS;
         g.fillText((certCustomName || "Y").charAt(0).toUpperCase(), ox, oy + 28);
@@ -6596,15 +8675,121 @@
       link.click();
     }
 
+    // ==========================================================================
+    // FULLSCREEN & HORIZONTAL ORIENTATION SYSTEM (MOBILE / DESKTOP)
+    // ==========================================================================
+    function isPhoneDevice() {
+      const isTouch = (typeof isTouchDevice === 'function' && isTouchDevice());
+      const isSmallScreen = Math.min(window.innerWidth, window.innerHeight) <= 1024;
+      return isTouch && isSmallScreen;
+    }
+
+    function checkOrientation() {
+      const overlay = document.getElementById('orientationOverlay');
+      if (!overlay) return;
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const isPhone = isPhoneDevice();
+      if (isPhone && isPortrait) {
+        overlay.style.display = 'flex';
+      } else {
+        overlay.style.display = '';
+      }
+    }
+
+    function isFullScreenActive() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    }
+
+    function updateFullscreenBtnState() {
+      const btn = document.getElementById('hudFullscreenBtn');
+      if (!btn) return;
+      const active = isFullScreenActive();
+      btn.classList.toggle('active', active);
+      btn.style.color = '';
+      btn.style.borderColor = '';
+      const icon = document.getElementById('hudFullscreenIcon');
+      if (icon) {
+        icon.innerText = active ? '🗗' : '⛶';
+      }
+    }
+
+    function requestFullScreenAndLandscape() {
+      const docEl = document.documentElement;
+      const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+      if (requestFS) {
+        requestFS.call(docEl).then(() => {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+          checkOrientation();
+          updateFullscreenBtnState();
+        }).catch(() => {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+          checkOrientation();
+        });
+      } else if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+        checkOrientation();
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!isFullScreenActive()) {
+        const docEl = document.documentElement;
+        const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+        if (requestFS) {
+          requestFS.call(docEl).then(() => {
+            if (isTouchDevice() && screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock('landscape').catch(() => {});
+            }
+            updateFullscreenBtnState();
+          }).catch(() => {});
+        }
+      } else {
+        const exitFS = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        if (exitFS) {
+          exitFS.call(document).then(() => {
+            updateFullscreenBtnState();
+          }).catch(() => {});
+        }
+      }
+    }
+
+    function onInteractPromptClick(e) {
+      if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      }
+      checkInteractions();
+    }
+
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      checkOrientation();
     });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        checkOrientation();
+      }, 250);
+    });
+
+    document.addEventListener('fullscreenchange', updateFullscreenBtnState);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenBtnState);
 
     loadGame();
     buildFloorEnvironment();
     updateHUD();
+    initTouchControls();
+    checkOrientation();
+    updateFullscreenBtnState();
     animate();
   </script>
 </body>
